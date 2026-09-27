@@ -1,0 +1,67 @@
+<p class="docs-kicker">Maintain</p>
+<h1>Production operations</h1>
+<p class="docs-lead">A reliable analytics installation needs durable backups, healthy background processes, deliberate upgrades, and clear retention. Treat the database and application key as critical production state.</p>
+
+<h2 id="health-checks">Health checks</h2>
+<p>The public <code>/health</code> endpoint is suitable for an uptime monitor. For deeper checks, sign in as a system administrator and open <strong>System health</strong>.</p>
+<div class="docs-code"><pre><code>docker compose ps
+docker compose logs --tail=200 app worker scheduler
+curl --fail https://analytics.example.com/health</code></pre></div>
+<p>The worker and scheduler publish heartbeats. A healthy web container alone does not mean ingestion, aggregation, alerts, email reports, retention, or scheduled maintenance are running.</p>
+<p>If a component is unhealthy, follow the symptom-based checks in <a href="/docs/troubleshooting/">Troubleshooting</a> before changing data or volumes.</p>
+
+<h2 id="backups">Backups</h2>
+<p>The supplied wrapper creates a version-matched PostgreSQL dump, private application files, environment configuration when available, and a manifest:</p>
+<div class="docs-code"><pre><code>./bin/backup</code></pre></div>
+<p>Move the completed directory to encrypted off-site storage. Protect it as sensitive data because it can contain administrator details, analytics data, connected CSV files, and secrets.</p>
+
+<h3 id="restore-test">Test restoration</h3>
+<p>Stop the application, worker, and scheduler; restore into a new empty database; restore private storage and the original <code>.env</code>; run migrations; rebuild caches; restart services; and verify login, sites, ingestion, and reports.</p>
+<div class="docs-callout warning"><span>!</span><p>Preserve the original <code>APP_KEY</code>. Replacing it makes existing encrypted source credentials and other encrypted application values unreadable.</p></div>
+
+<h2 id="upgrades">Upgrades</h2>
+<ol class="docs-steps">
+    <li><strong>Read the release notes and back up.</strong><p>Confirm the backup exists off the server before changing the running version.</p></li>
+    <li><strong>Fetch the selected release.</strong><p>Use a reviewed tag or production branch rather than an arbitrary working tree.</p></li>
+    <li><strong>Build the new image.</strong><p>Run <code>docker compose build --pull</code>.</p></li>
+    <li><strong>Restart gracefully.</strong><p>Terminate Horizon, run <code>docker compose up -d --remove-orphans</code>, and let the initializer apply migrations.</p></li>
+    <li><strong>Verify.</strong><p>Check health, logs, login, ingestion, queue processing, aggregation, and key reports.</p></li>
+</ol>
+
+<h2 id="scheduled-work">Scheduled work</h2>
+<p>The scheduler maintains service heartbeats, Horizon snapshots, event partitions, hourly rollups, alerts, retention, dashboard reports, and GeoIP updates. Docker runs <code>php artisan schedule:work</code>; a native installation must run <code>php artisan schedule:run</code> every minute.</p>
+
+<h2 id="retention">Retention</h2>
+<p><code>RAW_RETENTION_DAYS</code> controls raw event lifetime, while <code>AGGREGATE_RETENTION_MONTHS</code> controls longer-lived rollups. Choose values that support real analysis and your privacy obligations. Shorter raw retention reduces storage and exposure while keeping aggregated trends available.</p>
+
+<h2 id="geoip">GeoIP</h2>
+<p>No GeoIP database is bundled. Obtain a compatible local database under the provider's terms, place it at the configured <code>GEOIP_PATH</code>, and use the optional update URL for scheduled refreshes. Reports continue without it, but geographic detail remains unavailable.</p>
+
+<h2 id="security-checklist">Security checklist</h2>
+<ul>
+    <li>Use HTTPS and secure session cookies.</li>
+    <li>Expose only SSH, HTTP, and HTTPS; keep application, PostgreSQL, and Redis ports private.</li>
+    <li>Restrict SSH, use key-based access, and apply operating-system security updates.</li>
+    <li>Keep <code>APP_DEBUG=false</code> and protect <code>.env</code>.</li>
+    <li>Use read-only external database credentials with narrow table access.</li>
+    <li>Review organization membership and revoke old shared dashboard links.</li>
+    <li>Run Composer and npm security audits during maintenance.</li>
+    <li>Test backups and incident procedures instead of assuming they work.</li>
+</ul>
+
+<h2 id="useful-commands">Useful commands</h2>
+<div class="docs-code"><pre><code># Service state
+docker compose ps
+
+# Recent application and worker output
+docker compose logs --tail=200 app worker scheduler
+
+# Rebuild Laravel caches
+docker compose exec -T app php artisan optimize
+
+# Gracefully restart Horizon
+docker compose exec -T app php artisan horizon:terminate
+
+# Stop containers while preserving volumes
+docker compose down</code></pre></div>
+<div class="docs-callout warning"><span>!</span><p>Never add <code>-v</code> to <code>docker compose down</code> on production data. It removes the named PostgreSQL, Redis, and application-storage volumes.</p></div>

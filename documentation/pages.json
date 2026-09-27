@@ -1,0 +1,98 @@
+{
+  "overview": {
+    "title": "Introduction",
+    "description": "What Privacy Analytics does and how the documentation is organized.",
+    "group": "Start here",
+    "keywords": "overview product privacy open source concepts"
+  },
+  "requirements": {
+    "title": "Server requirements",
+    "description": "Hardware, software, network and mail requirements.",
+    "group": "Start here",
+    "keywords": "server php docker postgres redis node ports hardware"
+  },
+  "installation": {
+    "title": "Installation",
+    "description": "Install on any Linux server with Docker or a native Laravel stack.",
+    "group": "Start here",
+    "keywords": "install docker compose nginx caddy ssl environment"
+  },
+  "forge": {
+    "title": "Laravel Forge",
+    "description": "Deploy and operate Privacy Analytics on a Forge-managed server.",
+    "group": "Start here",
+    "keywords": "forge deploy nginx tls script horizon scheduler"
+  },
+  "getting-started": {
+    "title": "First workspace",
+    "description": "Complete setup, add a site and start collecting useful events.",
+    "group": "Using the app",
+    "keywords": "setup token organization site tracker snippet visual designer events object mapping"
+  },
+  "tutorials": {
+    "title": "Interactive tutorials",
+    "description": "Learn common workflows with animated, step-by-step walkthroughs.",
+    "group": "Using the app",
+    "keywords": "tutorial walkthrough slides animation setup tracker object mapping cards nested regex visual designer"
+  },
+  "tracking-events": {
+    "title": "Tracking and events",
+    "description": "Understand the tracker, custom events, automatic events and visual rules.",
+    "group": "Using the app",
+    "keywords": "tracker events custom javascript automatic outbound download rules visual designer engagement spa object mapping wildcard regex"
+  },
+  "analytics": {
+    "title": "Analytics reports",
+    "description": "Understand every report from Overview through Retention.",
+    "group": "Using the app",
+    "keywords": "audience acquisition engagement goals funnels journeys retention explore"
+  },
+  "entity-analytics": {
+    "title": "Object analytics",
+    "description": "Optionally measure any reusable product or business object and share scoped performance reports.",
+    "group": "Using the app",
+    "keywords": "objects entities products content courses profiles listings impressions views clicks portal year comparison wildcard regex cards parent child attributes mapping custom type"
+  },
+  "data-sources": {
+    "title": "External data",
+    "description": "Connect PostgreSQL, MySQL and CSV data and define reusable fields.",
+    "group": "Using the app",
+    "keywords": "postgres mysql csv dataset metric dimension calculated formula source"
+  },
+  "dashboards": {
+    "title": "Custom dashboards",
+    "description": "Create tabbed dashboards from native and connected data.",
+    "group": "Using the app",
+    "keywords": "widgets tabs filters scorecard chart table share export schedule version"
+  },
+  "insights-reporting": {
+    "title": "Insights and reporting",
+    "description": "Use alerts, decisions, annotations, email reports and data quality.",
+    "group": "Using the app",
+    "keywords": "insights alerts email decisions kpi annotations investigations quality"
+  },
+  "privacy-security": {
+    "title": "Privacy and security",
+    "description": "Learn what is collected, discarded, retained and controlled by operators.",
+    "group": "Reference",
+    "keywords": "privacy security pii cookies ip hashing retention query referrer consent access"
+  },
+  "environment": {
+    "title": "Environment reference",
+    "description": "Configure application, database, Redis, mail, retention and GeoIP settings.",
+    "group": "Reference",
+    "keywords": "environment env app key url domain database redis mail retention geoip proxy configuration"
+  },
+  "troubleshooting": {
+    "title": "Troubleshooting",
+    "description": "Diagnose installation, tracking, queues, reports, mail and connected sources.",
+    "group": "Reference",
+    "keywords": "troubleshoot errors logs health queue scheduler tracker cors mail database docker"
+  },
+  "operations": {
+    "title": "Operations",
+    "description": "Back up, upgrade, monitor and secure a production installation.",
+    "group": "Maintain",
+    "keywords": "backup restore upgrade health horizon scheduler retention geoip security"
+  }
+}

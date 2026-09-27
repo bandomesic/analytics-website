@@ -1,0 +1,70 @@
+<p class="docs-kicker">Trust boundary</p>
+<h1>Privacy and security</h1>
+<p class="docs-lead">Privacy Analytics minimizes browser collection by design and keeps deployment control with the operator. This page describes the technical boundary precisely so teams can make informed policy, consent, access, and retention decisions.</p>
+
+<div class="docs-callout warning"><span>!</span><p>Self-hosting and data minimization do not automatically make a deployment compliant with every law. Review purpose, notice, consent, hosting location, access, and retention with the people responsible for privacy in your organization.</p></div>
+
+<h2 id="collected-data">What is collected</h2>
+<div class="docs-table-wrap"><table><thead><tr><th>Signal</th><th>Durable representation</th></tr></thead><tbody>
+<tr><td>Page location</td><td>Path plus allowed UTM campaign fields</td></tr>
+<tr><td>Referrer</td><td>Domain and channel classification</td></tr>
+<tr><td>Browser context</td><td>Device type, browser family, and operating-system family</td></tr>
+<tr><td>Approximate location</td><td>Country and region when a local GeoIP database is installed</td></tr>
+<tr><td>Traffic quality</td><td>Human, probable bot, monitoring, internal, or unknown classification</td></tr>
+<tr><td>Behavior</td><td>Pageviews, configured events, and summarized active seconds</td></tr>
+<tr><td>Campaign</td><td><code>utm_source</code>, <code>utm_medium</code>, <code>utm_campaign</code>, <code>utm_content</code>, and <code>utm_term</code></td></tr>
+</tbody></table></div>
+
+<h2 id="discarded-data">What is discarded</h2>
+<ul>
+    <li>URL fragments and all query parameters except the five controlled UTM fields.</li>
+    <li>Full referrer paths, queries, and fragments.</li>
+    <li>Raw IP addresses and raw user-agent strings before durable queueing.</li>
+    <li>Form values, element text, link text, and complete outbound destination URLs.</li>
+    <li>Properties with suspicious personal-data keys, email-shaped values, nested objects, or unsupported types.</li>
+</ul>
+<p>The supplied Nginx container disables access logging. Review the logging configuration of any reverse proxy in front of the app so request bodies, designer tokens, and sensitive query strings are not added elsewhere.</p>
+
+<h2 id="visitor-session-estimates">Visitor and session estimates</h2>
+<p>Visitor counts use site-specific HMAC-derived values based on transient network and browser inputs. Daily visitor estimates rotate, while a separate cohort estimate supports retention analysis. Sessions are short-lived mappings with a 30-minute timeout.</p>
+<p>These values estimate browsers and visits. They are not accounts, durable people profiles, or a reliable way to identify one person across devices.</p>
+
+<h2 id="browser-storage">Browser storage</h2>
+<p>The public tracker sets no cookies and does not use local storage or session storage. Events wait only in memory until sent. If every lifecycle transport fails while a page closes, the event may be lost; the app accepts that tradeoff instead of creating a persistent browser queue.</p>
+<p>The authenticated dashboard uses a first-party Laravel session cookie. Administrator and member accounts are operational application data and are separate from visitor analytics.</p>
+
+<h2 id="origin-boundary">Site and origin boundary</h2>
+<p>Each site is registered with one exact origin. Browser collection requests are accepted only for that site and origin. The Visual Designer also checks the origin before exchanging its short-lived launch code.</p>
+<p>Use separate sites for production, staging, and other origins. Copying one site's snippet to another origin should fail instead of merging unrelated traffic.</p>
+
+<h2 id="internal-traffic">Internal and automated traffic</h2>
+<p>Site managers can configure exact IP addresses or CIDR ranges for offices and VPNs. The address is compared transiently and then discarded; the durable event contains only an <code>internal</code> classification. Standard reports exclude internal traffic by default.</p>
+<p>Bot and monitoring detection reduces the user agent to bounded classifications and reasons. Confirm <code>TRUSTED_PROXIES</code> when deploying behind a reverse proxy, because a wrong client address weakens internal and traffic-quality classification.</p>
+
+<h2 id="retention-controls">Retention controls</h2>
+<p>Raw events default to 90 days and daily aggregates to 25 months. Configure these periods with <code>RAW_RETENTION_DAYS</code> and <code>AGGREGATE_RETENTION_MONTHS</code>. The scheduled retention job removes expired raw partitions, deduplication records, old hourly rollups, and expired daily aggregates.</p>
+<div class="docs-code"><pre><code># Preview the retention plan
+docker compose exec -T app php artisan analytics:retention
+
+# Apply it immediately
+docker compose exec -T app php artisan analytics:retention --execute</code></pre></div>
+<p>Use the preview before changing retention or running the command manually. Backups can retain data longer than the live system, so align backup expiration with the same policy.</p>
+
+<h2 id="access-security">Access and infrastructure</h2>
+<ul>
+    <li>Serve the application only over HTTPS and enable secure session cookies.</li>
+    <li>Keep PostgreSQL, Redis, and the internal application port off the public internet.</li>
+    <li>Protect <code>.env</code>, backups, connected-source credentials, and dashboard share passwords.</li>
+    <li>Give external database users read-only access to selected reporting views or tables.</li>
+    <li>Review organization membership and revoke unused public dashboard shares.</li>
+    <li>Preserve <code>APP_KEY</code>; it protects encrypted application values such as source credentials.</li>
+</ul>
+
+<h2 id="operator-checklist">Operator review checklist</h2>
+<ol class="docs-steps">
+    <li><strong>Define the purpose.</strong><p>List the product and business questions that justify each event and property.</p></li>
+    <li><strong>Review notices and consent.</strong><p>Decide what your jurisdiction, audience, and collection choices require.</p></li>
+    <li><strong>Set access and retention.</strong><p>Keep only the team members and history needed for those purposes.</p></li>
+    <li><strong>Test the boundary.</strong><p>Inspect browser requests, reverse-proxy logs, exports, backups, and custom event code.</p></li>
+    <li><strong>Revisit changes.</strong><p>Repeat the review when adding events, sources, recipients, or integrations.</p></li>
+</ol>

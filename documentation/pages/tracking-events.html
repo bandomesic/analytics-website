@@ -1,0 +1,77 @@
+<p class="docs-kicker">Collection guide</p>
+<h1>Tracking and events</h1>
+<p class="docs-lead">The lightweight browser tracker records pageviews, active engagement, and the interactions you explicitly configure. This guide explains what happens in the browser, how to model useful events, and how to verify that collection works.</p>
+
+<div class="docs-callout success"><span>✓</span><p><strong>Start small.</strong> Install pageview tracking first, then add only the events that answer an active product or business question.</p></div>
+
+<h2 id="tracker-lifecycle">How the tracker works</h2>
+<p>The generated snippet loads <code>tracker.js</code> from your Privacy Analytics installation and identifies the registered site with its public ID. The tracker:</p>
+<ol class="docs-steps">
+    <li><strong>Validates its configuration.</strong><p>It derives collection and configuration endpoints from its own script URL and stops safely when the public site ID or URL is invalid.</p></li>
+    <li><strong>Records navigation.</strong><p>It sends the initial pageview and detects browser back/forward navigation plus History API changes used by single-page applications.</p></li>
+    <li><strong>Queues briefly in memory.</strong><p>Events flush every five seconds, when ten events are waiting, and during page lifecycle transitions. Nothing is stored in browser cookies, local storage, or session storage.</p></li>
+    <li><strong>Processes asynchronously.</strong><p>The server sanitizes accepted events before Redis queueing, then Horizon writes deduplicated events and updates reports.</p></li>
+</ol>
+<p>The tracker is dependency-free and has a 10 KB compressed size budget. Collection failures are isolated so they cannot break the tracked website.</p>
+
+<h2 id="pageviews-engagement">Pageviews and engagement</h2>
+<p>A pageview contains the sanitized path, controlled UTM fields, referrer origin, timestamp, and a random event UUID. URL fragments and non-campaign query parameters are removed before transmission.</p>
+<p>Engagement measures whole seconds while the document is visible and the browser window has focus. It sends a summarized duration when navigation or a lifecycle transition occurs. Treat this as active-time estimation rather than exact attention or reading time.</p>
+
+<h2 id="custom-events">Send a custom event</h2>
+<p>Use the browser API for interactions already represented in your application code, such as completing onboarding or switching a plan. Call it after the Privacy Analytics script has loaded:</p>
+<div class="docs-code"><pre><code>window.privacyAnalytics?.track('signup_completed', {
+    plan: 'starter',
+    seats: 3,
+    trial: true,
+});</code></pre></div>
+<p>Event names may contain letters, numbers, dots, underscores, colons, and hyphens, with a maximum length of 100 characters. Properties may be strings, finite numbers, or booleans.</p>
+
+<div class="docs-table-wrap"><table><thead><tr><th>Good field</th><th>Avoid</th><th>Reason</th></tr></thead><tbody>
+<tr><td><code>plan: "starter"</code></td><td><code>email: "person@example.com"</code></td><td>Email-related keys and email-shaped values are discarded.</td></tr>
+<tr><td><code>items: 3</code></td><td><code>customer: { ... }</code></td><td>Nested objects and arrays are not accepted.</td></tr>
+<tr><td><code>experiment: "pricing_a"</code></td><td><code>form_value: "..."</code></td><td>Do not send free-form personal or sensitive input.</td></tr>
+</tbody></table></div>
+<p>Each event accepts at most 20 properties. Keys are limited to 50 characters and string values to 200 characters. The browser and server both apply filtering.</p>
+
+<h2 id="automatic-events">Automatic link events</h2>
+<p>Open <strong>Tracking & events → Automatic events</strong> to enable either option independently:</p>
+<ul>
+    <li><strong>Outbound links</strong> emit <code>outbound_link</code> with only the destination hostname.</li>
+    <li><strong>File downloads</strong> emit <code>file_download</code> with only a recognized file extension.</li>
+</ul>
+<p>Link text, destination paths, query strings, URL fragments, and form values are never included. Automatic events are disabled until a site manager enables them.</p>
+
+<h2 id="tracking-rules">Create interaction rules</h2>
+<p>Rules let non-developers define an event for a matching element. A rule contains a CSS selector, event name, trigger, optional exact page path, minimum duration, visibility threshold, and once-per-page behavior.</p>
+<div class="docs-table-wrap"><table><thead><tr><th>Trigger</th><th>Use it for</th><th>Configuration that matters</th></tr></thead><tbody>
+<tr><td>Click</td><td>Buttons, cards, navigation actions</td><td>Stable selector and optional page path</td></tr>
+<tr><td>Visibility</td><td>Pricing sections, calls to action, key messages</td><td>Visible percentage and duration</td></tr>
+<tr><td>Hover</td><td>Menus or explanatory controls</td><td>Minimum hover duration</td></tr>
+<tr><td>Focus</td><td>Form fields without collecting their value</td><td>Stable field selector</td></tr>
+<tr><td>Form submission</td><td>Successful browser form submissions</td><td>Form selector; values are never read</td></tr>
+</tbody></table></div>
+<p>Saving creates a draft. Publishing creates an immutable version that trackers can download. Editing a published rule leaves the live version unchanged until you publish again. You can roll back to an earlier version or archive a rule.</p>
+
+<h2 id="visual-designer">Use the Visual Event Designer</h2>
+<p>The designer opens your registered site with a short-lived session. Point at an element, review the selector and match count, choose whether one or all matching elements should count, and test the interaction locally.</p>
+<ul>
+    <li>Prefer <code>data-analytics-id</code>, another stable data attribute, or a unique ID.</li>
+    <li>Avoid selectors based on visual position or generated class names.</li>
+    <li>Use the exact page path when the same selector has a different meaning elsewhere.</li>
+    <li>Test mode does not send analytics events, so configuration work does not pollute reports.</li>
+</ul>
+<p>General event rules are saved as drafts for review. Optional object mappings can be published directly from the designer: choose <strong>Reusable object</strong>, provide any object type your product needs, enter a link pattern such as <code>/items/*</code>, and the wildcard value becomes the stable ID for every matching item.</p>
+<p>For detail pages, repeating cards, nested parent and child objects, attributes, fixed IDs, and regular expressions, read the <a href="/docs/entity-analytics/#no-code-mapping">Object mapping guide</a>.</p>
+
+<h2 id="verify-events">Verify collection</h2>
+<ol class="docs-steps">
+    <li><strong>Check the connection state.</strong><p>Site settings should show that at least one pageview has arrived.</p></li>
+    <li><strong>Use a normal browser visit.</strong><p>Open the registered origin, perform the interaction once, and wait for the in-memory flush and queue processing.</p></li>
+    <li><strong>Review Engagement or Goals.</strong><p>Confirm the event name appears before turning it into a conversion or funnel step.</p></li>
+    <li><strong>Inspect selector health.</strong><p>Recent matches indicate activity; no recent matches may also mean the element had no traffic.</p></li>
+</ol>
+
+<h2 id="collection-limits">Collection limits</h2>
+<p>The batch endpoint accepts at most 50 events and 65,536 bytes per request. Events older than seven days, more than one day in the future, malformed events, and requests from a different browser origin are rejected. UUID deduplication makes retries safe.</p>
+<p>For missing events, continue with <a href="/docs/troubleshooting/#tracker-not-connected">Tracker does not connect</a>.</p>

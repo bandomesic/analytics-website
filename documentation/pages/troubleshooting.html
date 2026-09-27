@@ -1,0 +1,84 @@
+<p class="docs-kicker">Problem solving</p>
+<h1>Troubleshooting</h1>
+<p class="docs-lead">Start with service health and recent logs, then narrow the problem to the web process, queue, scheduler, tracker, mail delivery, or connected source. The checks below follow the same path data takes through the system.</p>
+
+<h2 id="first-checks">Run these checks first</h2>
+<div class="docs-code"><pre><code>docker compose ps
+docker compose logs --tail=200 app worker scheduler
+curl --fail http://127.0.0.1:8080/health
+docker compose exec -T app php artisan analytics:check</code></pre></div>
+<p>Every long-running service should be up and healthy. The public health endpoint verifies required application dependencies; the authenticated <strong>System health</strong> page adds collection, aggregation, conversion, source, queue, and scheduler context.</p>
+
+<h2 id="containers-unhealthy">Containers do not become healthy</h2>
+<ul>
+    <li>Read <code>docker compose logs init</code>. Application services wait for the initializer to complete migrations.</li>
+    <li>Confirm <code>DB_PASSWORD</code>, <code>APP_KEY</code>, and other required values exist in <code>.env</code>.</li>
+    <li>Check free disk space and memory with host tools. PostgreSQL may refuse to start when storage is full.</li>
+    <li>Make sure another service is not using <code>APP_PORT</code>.</li>
+    <li>After correcting configuration, run <code>docker compose up -d --build</code> again.</li>
+</ul>
+
+<h2 id="database-authentication">Database authentication fails</h2>
+<p>Read initializer logs before increasing deployment timeouts. PostgreSQL creates users only on the volume’s first startup; current environment values do not rename users or reset passwords. Use the original credentials or follow the <a href="/docs/forge/#database-recovery">Forge database recovery steps</a>. Do not delete tables or volumes. Errors mentioning MySQL indicate the wrong deployment path or an older configuration.</p>
+
+<h2 id="installer-rejects-token">Installer rejects the setup token</h2>
+<p>Run the command from the repository directory containing the active <code>.env</code> file:</p>
+<div class="docs-code"><pre><code>grep '^SETUP_TOKEN=' .env</code></pre></div>
+<p>Copy only the value after the first equals sign into the installer form. Do not include quotes unless they are part of the value. If setup was already completed, the installer is permanently closed and normal sign-in should be used.</p>
+
+<h2 id="tracker-not-connected">Tracker does not connect</h2>
+<ol class="docs-steps">
+    <li><strong>Confirm the snippet.</strong><p>Use the snippet from this exact site and verify that <code>tracker.js</code> loads successfully in browser developer tools.</p></li>
+    <li><strong>Check the registered origin.</strong><p>Scheme, host, and port must match exactly. <code>https://www.example.com</code> and <code>https://example.com</code> are different origins.</p></li>
+    <li><strong>Inspect the batch request.</strong><p>Look for <code>POST /api/v1/batch</code>. A browser-origin or validation error points to site configuration or event shape.</p></li>
+    <li><strong>Check the worker.</strong><p>If requests succeed but reports remain empty, inspect worker logs and the queue heartbeat.</p></li>
+    <li><strong>Allow processing time.</strong><p>Realtime data arrives before hourly and daily aggregate reports.</p></li>
+</ol>
+
+<h2 id="missing-custom-event">A custom event is missing</h2>
+<p>Confirm the event name matches the allowed pattern and that the call runs after the tracker is available. Remove personal-data fields, nested objects, arrays, and non-finite numbers. Test with a minimal event:</p>
+<div class="docs-code"><pre><code>window.privacyAnalytics?.track('docs_test', {
+    source: 'manual',
+    count: 1,
+});</code></pre></div>
+<p>For visual rules, confirm the rule is published, its page-path condition matches, and the selector still matches the intended element. “No recent matches” is not proof that a selector is broken; the element may simply have received no qualifying traffic.</p>
+
+<h2 id="reports-empty-stale">Reports are empty or stale</h2>
+<ul>
+    <li>Check the selected date range and whether the current UTC day is complete.</li>
+    <li>Review traffic-quality filters and internal-network configuration.</li>
+    <li>Verify the worker and scheduler heartbeats in System health.</li>
+    <li>Run the rollup manually when recovering from downtime:</li>
+</ul>
+<div class="docs-code"><pre><code>docker compose exec -T app php artisan analytics:rollup</code></pre></div>
+<p>The rollup is idempotent. Use <code>--site</code>, <code>--from</code>, and <code>--to</code> for a deliberate historical rebuild after reviewing command help.</p>
+
+<h2 id="emails-not-arriving">Emails do not arrive</h2>
+<ul>
+    <li>Check that <code>MAIL_MAILER</code> is a delivery transport rather than <code>log</code>.</li>
+    <li>Use <strong>Email previews</strong> to separate rendering from transport problems.</li>
+    <li>Inspect worker logs because alerts and reports are queued.</li>
+    <li>Confirm the scheduler is healthy; alerts run hourly and scheduled dashboards are evaluated daily.</li>
+    <li>Check provider authentication, sender verification, suppression lists, and spam placement.</li>
+</ul>
+
+<h2 id="external-source-fails">An external source fails</h2>
+<p>For PostgreSQL or MySQL, test connectivity from the analytics server rather than from your laptop. Confirm DNS, port, firewall rules, TLS requirements, database name, and read-only permissions. The source user needs access to each reporting table or view you expose.</p>
+<p>For CSV files, verify the 5 MB and 100,000-row limits, unique headers, and stable columns. Replacing a CSV fails when the new file removes a column already used by a metric.</p>
+<p>If a connection succeeds but a metric is wrong, inspect the source rows, date column, numeric type, aggregation, filters, and calculated formula. Connection health proves reachability, not business meaning.</p>
+
+<h2 id="proxy-login-loop">HTTPS links, redirects, or login behave incorrectly</h2>
+<p>Set <code>APP_URL</code> to the public HTTPS URL, enable <code>SESSION_SECURE_COOKIE=true</code>, and configure <code>TRUSTED_PROXIES</code> for the actual reverse proxy address. Ensure the proxy forwards <code>Host</code>, <code>X-Forwarded-Proto</code>, and <code>X-Forwarded-For</code>.</p>
+
+<p>If CSS and scripts are blocked as mixed content, follow the <a href="/docs/forge/#https-proxy">Forge HTTPS proxy steps</a>. Save the environment and redeploy to recreate containers and refresh cached configuration, then hard-refresh the browser.</p>
+
+<h2 id="after-deployment">The old interface remains after deployment</h2>
+<p>Rebuild the production image or frontend assets and refresh Laravel caches:</p>
+<div class="docs-code"><pre><code>docker compose build --pull
+docker compose up -d --remove-orphans
+docker compose exec -T app php artisan optimize</code></pre></div>
+<p>Then perform a hard refresh in the browser. A native installation must run <code>npm ci && npm run build</code> during deployment.</p>
+
+<h2 id="safe-recovery">Safe recovery boundaries</h2>
+<div class="docs-callout warning"><span>!</span><p>Do not run <code>docker compose down -v</code>, regenerate <code>APP_KEY</code>, delete PostgreSQL files, or restore over the live database while diagnosing a problem. Take a backup and understand the failure first.</p></div>
+<p>For backup, restore, upgrade, and retention procedures, continue to <a href="/docs/operations/">Production operations</a>.</p>

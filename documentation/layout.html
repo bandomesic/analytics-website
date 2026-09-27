@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{{description}}">
+    <meta name="theme-color" content="#172c70">
+    <title>{{title}} · Privacy Analytics documentation</title>
+    <script>try{document.documentElement.dataset.theme=localStorage.getItem('analytics-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}catch(e){document.documentElement.dataset.theme='light'}</script>
+        <link rel="stylesheet" href="/base.css">
+    <link rel="stylesheet" href="/documentation.css">
+    <script type="module" src="/documentation.js"></script>
+</head>
+<body class="docs-body">
+<a class="skip-link" href="#documentation-content">Skip to documentation</a>
+
+<header class="docs-header">
+    <a class="docs-brand" href="/" aria-label="Privacy Analytics home">
+        <span class="docs-brand-mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none"><path d="M6 21V13M14 21V6M22 21V10" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg></span>
+        <span class="docs-brand-name"><strong>Privacy</strong><span>Analytics</span></span>
+        <small>Docs</small>
+    </a>
+    <nav class="docs-header-links" aria-label="Documentation links">
+        <a href="/">Product</a>
+        <a href="http://127.0.0.1:8082/demo" data-demo-link>Live demo</a>
+        <a href="https://github.com/bandomesic/analytics" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+    </nav>
+    <div class="docs-header-actions">
+        <button class="docs-icon-button docs-mobile-toggle" type="button" data-docs-menu aria-controls="docs-sidebar" aria-expanded="false"><span aria-hidden="true">☰</span><span class="sr-only">Open documentation navigation</span></button>
+        <button class="docs-theme-toggle" type="button" data-theme-toggle><span aria-hidden="true">◐</span><span data-theme-label>Light</span></button>
+        <a class="docs-open-app" href="http://127.0.0.1:8082/demo" data-demo-link>Explore demo <span aria-hidden="true">→</span></a>
+    </div>
+</header>
+
+<div class="docs-shell">
+    <aside class="docs-sidebar" id="docs-sidebar" aria-label="Documentation navigation">
+        <div class="docs-search-wrap">
+            <label for="docs-search">Search documentation</label>
+            <span aria-hidden="true">⌕</span>
+            <input id="docs-search" type="search" placeholder="Search the docs…" autocomplete="off" data-docs-search>
+            <kbd>/</kbd>
+        </div>
+        <nav class="docs-navigation">
+{{navigation}}
+</nav>
+        <div class="docs-sidebar-note"><span aria-hidden="true">✦</span><p><strong>Need an example?</strong><br>Explore every report with sample data.</p><a href="http://127.0.0.1:8082/demo" data-demo-link>Open demo →</a></div>
+    </aside>
+
+    <main id="documentation-content" class="docs-content">
+        <article class="docs-article" data-docs-article>
+{{content}}
+{{pagination}}
+</article>
+    </main>
+
+    <aside class="docs-toc" aria-label="On this page">
+        <strong>On this page</strong>
+        <nav data-docs-toc></nav>
+        <a class="docs-edit-link" href="https://github.com/bandomesic/analytics" target="_blank" rel="noopener noreferrer">Improve this page ↗</a>
+    </aside>
+</div>
+
+<footer class="docs-footer">
+    <div class="docs-footer-inner">
+        <div class="docs-footer-top">
+            <div class="docs-footer-brand">
+                <a class="docs-footer-logo" href="/" aria-label="Privacy Analytics home">
+                    <span class="docs-brand-mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none"><path d="M6 21V13M14 21V6M22 21V10" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg></span>
+                    <span><strong>Privacy</strong>Analytics<small>open source</small></span>
+                </a>
+                <p>Useful insight for teams.<br>Respect for every visitor.</p>
+                <span class="docs-footer-principle"><i></i> Your data. Your infrastructure.</span>
+            </div>
+            <nav class="docs-footer-links" aria-label="Documentation footer">
+                <div>
+                    <strong>Learn</strong>
+                    <a href="/docs/overview/">Introduction</a>
+                    <a href="/docs/getting-started/">First workspace</a>
+                    <a href="/docs/tutorials/">Interactive tutorials</a>
+                    <a href="/docs/tracking-events/">Tracking and events</a>
+                    <a href="/docs/analytics/">Analytics reports</a>
+                </div>
+                <div>
+                    <strong>Build</strong>
+                    <a href="/docs/data-sources/">External data</a>
+                    <a href="/docs/entity-analytics/">Object analytics</a>
+                    <a href="/docs/dashboards/">Custom dashboards</a>
+                    <a href="/docs/insights-reporting/">Insights and reporting</a>
+                    <a href="http://127.0.0.1:8082/demo" data-demo-link>Explore the demo ↗</a>
+                </div>
+                <div>
+                    <strong>Operate</strong>
+                    <a href="/docs/installation/">Installation</a>
+                    <a href="/docs/forge/">Laravel Forge</a>
+                    <a href="/docs/environment/">Environment reference</a>
+                    <a href="/docs/troubleshooting/">Troubleshooting</a>
+                </div>
+                <div>
+                    <strong>Project</strong>
+                    <a href="/docs/privacy-security/">Privacy and security</a>
+                    <a href="https://github.com/bandomesic/analytics" target="_blank" rel="noopener noreferrer">Source on GitHub ↗</a>
+                    <a href="https://github.com/bandomesic/analytics/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License ↗</a>
+                    <a href="http://127.0.0.1:8082/demo" data-demo-link>Explore the demo →</a>
+                </div>
+            </nav>
+        </div>
+        <div class="docs-footer-bottom">
+            <span>© <span data-current-year></span> Privacy Analytics. Built in the open.</span>
+            <span class="docs-footer-meta">Laravel · Livewire · PostgreSQL · Redis</span>
+            <a href="#documentation-content">Back to top ↑</a>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

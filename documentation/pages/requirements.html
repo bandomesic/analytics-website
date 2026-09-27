@@ -1,0 +1,47 @@
+<p class="docs-kicker">Start here</p>
+<h1>Server requirements</h1>
+<p class="docs-lead">The supported and simplest production setup is Docker Compose on a current Linux server. A native Laravel deployment is also possible when every runtime and background process is configured explicitly.</p>
+
+<h2 id="recommended-server">Recommended server</h2>
+<div class="docs-table-wrap"><table><thead><tr><th>Resource</th><th>Starting point</th><th>Why</th></tr></thead><tbody>
+<tr><td><strong>Operating system</strong></td><td>Ubuntu 24.04 LTS</td><td>Long support window and straightforward Docker installation.</td></tr>
+<tr><td><strong>CPU</strong></td><td>2 cores</td><td>Leaves capacity for the web process, Horizon, scheduler, PostgreSQL, and Redis.</td></tr>
+<tr><td><strong>Memory</strong></td><td>4 GB</td><td>A practical minimum for the complete six-service Compose stack.</td></tr>
+<tr><td><strong>Storage</strong></td><td>30 GB SSD</td><td>Increase this for traffic volume, raw-event retention, CSV files, and local backups.</td></tr>
+<tr><td><strong>Network</strong></td><td>Public 80/443; restricted 22</td><td>The application port stays bound to loopback. PostgreSQL and Redis are never public.</td></tr>
+</tbody></table></div>
+<p>Capacity depends on event volume, query range, retention, connected datasets, and concurrent users. Monitor database size, queue depth, response time, disk use, and memory after launch, then scale from observed demand.</p>
+
+<h2 id="docker-requirements">Docker deployment</h2>
+<p>The host needs only:</p>
+<ul>
+    <li>Docker Engine with the Compose v2 plugin.</li>
+    <li>OpenSSL for first-run secret generation.</li>
+    <li>Git to clone and update the repository.</li>
+    <li>A reverse proxy or the supplied Caddy overlay for HTTPS.</li>
+</ul>
+<p>The production image includes PHP, Composer, Nginx, compiled frontend assets, and required extensions. Compose adds PostgreSQL, Redis, the migration initializer, Horizon, and the scheduler.</p>
+
+<h2 id="native-requirements">Native Laravel deployment</h2>
+<p>A native installation requires the following versions and services:</p>
+<div class="docs-table-wrap"><table><thead><tr><th>Component</th><th>Requirement</th></tr></thead><tbody>
+<tr><td>PHP</td><td>8.5 with PDO PostgreSQL, PDO MySQL, Intl, Zip, PCNTL, BCMath, and Redis extensions</td></tr>
+<tr><td>Database</td><td>PostgreSQL 18</td></tr>
+<tr><td>Cache and queue</td><td>Redis 8 with persistence and a no-eviction policy</td></tr>
+<tr><td>Dependency manager</td><td>Composer 2</td></tr>
+<tr><td>Frontend build</td><td>Node.js 22.12 or newer and npm</td></tr>
+<tr><td>Web runtime</td><td>Nginx or Apache serving only <code>public/</code> through PHP-FPM</td></tr>
+<tr><td>Background work</td><td>A process supervisor for Horizon and cron for Laravel's scheduler</td></tr>
+</tbody></table></div>
+
+<div class="docs-callout warning"><span>!</span><p>Do not use <code>php artisan serve</code> in production. It is a development server and does not replace a production web server and PHP-FPM.</p></div>
+
+<h2 id="domain-and-tls">Domain, DNS, and TLS</h2>
+<p>Create an A record, and an AAAA record when IPv6 is configured, pointing the analytics domain to the server. HTTPS is required for production so sessions remain secure and browser requests from tracked sites are transported safely.</p>
+<p>The public URL belongs in <code>APP_URL</code>, and <code>SESSION_SECURE_COOKIE</code> must be enabled after HTTPS works. When a reverse proxy terminates TLS, configure <code>TRUSTED_PROXIES</code> with the actual private proxy address or subnet seen by the application.</p>
+
+<h2 id="email-delivery">Email delivery</h2>
+<p>SMTP or another Laravel-supported mail transport is needed for alerts, scheduled dashboard reports, and future account messages. The default <code>log</code> mailer is useful while evaluating the app, but it does not send to an inbox.</p>
+
+<h2 id="persistent-storage">Persistent storage</h2>
+<p>Back up the PostgreSQL database, the application storage volume, and the operator-managed <code>.env</code> file. Redis supports queues and cache but is not the permanent analytics database. Keep enough free disk space to create a local backup before transferring it off the server.</p>

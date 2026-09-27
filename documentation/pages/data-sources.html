@@ -1,0 +1,59 @@
+<p class="docs-kicker">Connected data</p>
+<h1>External data sources</h1>
+<p class="docs-lead">Bring business context into the same dashboard as product analytics. Connect a read-only PostgreSQL or MySQL database, or upload a CSV snapshot, then expose only the metrics you want the application to use.</p>
+
+<h2 id="where-to-connect">Where to connect a source</h2>
+<p>Open a site, choose <strong>Site settings</strong>, and scroll to <strong>Connected data</strong>. Only organization owners and administrators can add or change sources. Credentials are encrypted at rest.</p>
+
+<h2 id="postgresql-mysql">PostgreSQL and MySQL</h2>
+<p>Create a dedicated database user with permission to <strong>SELECT</strong> only the tables or views needed for reporting. Do not reuse an application owner, migration, or administrator account.</p>
+<ol class="docs-steps">
+    <li><strong>Allow network access.</strong><p>Permit connections from the analytics server through a private network, VPN, or tightly restricted firewall rule.</p></li>
+    <li><strong>Create a read-only credential.</strong><p>Grant access to specific reporting tables or, preferably, purpose-built views.</p></li>
+    <li><strong>Enter the connection details.</strong><p>Choose PostgreSQL or MySQL, then provide host, port, database, username, and password. PostgreSQL also exposes an SSL mode.</p></li>
+    <li><strong>Test and connect.</strong><p>The application verifies the credential before saving the source.</p></li>
+</ol>
+
+<div class="docs-callout warning"><span>!</span><p>Do not expose a database to the whole internet. Restrict the source firewall to the analytics server and require encrypted transport at the database or network layer.</p></div>
+
+<h2 id="schema-browser">Inspect the schema</h2>
+<p>Open a connected source to browse readable tables and columns. Select a table to preview up to five rows before defining a dataset. This confirms names and value shapes without importing the source database into Privacy Analytics.</p>
+
+<h2 id="datasets">Create a dataset</h2>
+<p>A dataset declares one allowed table, an optional date column, and the fields available to dashboards. For PostgreSQL, schema-qualified names such as <code>public.orders</code> are supported. For MySQL, use the table name.</p>
+<p>The optional date column makes dashboard date ranges filter the external metric. Without one, the metric represents all rows and remains unchanged when the dashboard range changes.</p>
+
+<h2 id="metrics">Define metrics</h2>
+<p>Each metric needs a display name, formula key, source column, and aggregation:</p>
+<div class="docs-table-wrap"><table><thead><tr><th>Aggregation</th><th>Use it for</th><th>Example</th></tr></thead><tbody>
+<tr><td><strong>Sum</strong></td><td>Add numeric values</td><td>Total revenue from <code>amount</code></td></tr>
+<tr><td><strong>Count</strong></td><td>Count rows or non-null values</td><td>Number of orders</td></tr>
+<tr><td><strong>Average</strong></td><td>Mean numeric value</td><td>Average order value</td></tr>
+<tr><td><strong>Minimum</strong></td><td>Smallest value</td><td>Lowest response time</td></tr>
+<tr><td><strong>Maximum</strong></td><td>Largest value</td><td>Highest contract value</td></tr>
+</tbody></table></div>
+<p>Formula keys must begin with a letter or underscore and may contain letters, numbers, and underscores. Use stable keys such as <code>revenue</code>, <code>orders</code>, or <code>refunds</code>.</p>
+
+<h2 id="calculated-fields">Calculated fields</h2>
+<p>A calculated field combines metrics from the same dataset using field keys, numbers, parentheses, and <code>+</code>, <code>-</code>, <code>*</code>, or <code>/</code>. Choose number, percent, or currency as the display type.</p>
+<div class="docs-code"><pre><code>revenue / orders
+(revenue - refunds) / revenue * 100
+orders * average_order_value</code></pre></div>
+<p>Division by zero returns no value instead of an invalid number. A formula cannot reference a key that is not defined as a metric in that dataset.</p>
+
+<h2 id="csv-files">CSV files</h2>
+<p>CSV uploads are useful for monthly targets, campaign costs, offline sales, support totals, and other snapshots that do not need a live database connection.</p>
+<ul>
+    <li>Maximum file size: 5 MB.</li>
+    <li>Maximum rows: 100,000.</li>
+    <li>The first row must contain unique column headers.</li>
+    <li>Dates should use ISO format such as <code>2026-09-23</code>.</li>
+    <li>Files are stored in private application storage.</li>
+</ul>
+<p>CSV upload creates a dataset and a row-count metric automatically. Add numeric metrics and calculated fields afterward. Replacing a CSV preserves its dataset only when the new file still contains every column used by existing metrics.</p>
+
+<h2 id="blended-metrics">Blend sources</h2>
+<p>Open <strong>Decision center → Data blends</strong> to combine two numeric metrics from native or connected sources. Supported operations are add, subtract, multiply, divide, and percent-of. Examples include revenue per visitor, support tickets per customer, and return on ad spend.</p>
+
+<h2 id="future-connectors">Preparing for future connectors</h2>
+<p>Dashboard blocks refer to a source and a metric through a shared source registry. This keeps the presentation independent from PostgreSQL, MySQL, CSV, or native analytics and provides the extension point for later connectors such as GA4, Matomo, advertising platforms, or warehouse APIs.</p>

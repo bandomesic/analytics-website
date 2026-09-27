@@ -1,0 +1,60 @@
+<p class="docs-kicker">Privacy Analytics documentation</p>
+<h1>Understand your product without giving up control.</h1>
+<p class="docs-lead">Privacy Analytics is an open-source, self-hosted analytics workspace for website and product teams. It combines respectful first-party measurement, connected business data, flexible dashboards, and a workflow for turning signals into decisions.</p>
+
+<div class="docs-callout success"><span>✓</span><p><strong>Want to see the finished product first?</strong> Open the <a href="http://127.0.0.1:8082/demo" data-demo-link>sample workspace</a>. It contains realistic data across every report and does not create customer records.</p></div>
+
+<h2 id="choose-your-path">Choose your path</h2>
+<div class="docs-feature-grid">
+    <article class="docs-feature-card"><span>01</span><h3>Install the server</h3><p>Review requirements, deploy with Docker or Laravel Forge, connect HTTPS, and claim the protected installer.</p><p><a href="/docs/installation/">Installation guide →</a></p></article>
+    <article class="docs-feature-card"><span>02</span><h3>Instrument a product</h3><p>Add the browser tracker, model useful events, publish visual rules, and verify the first real interactions.</p><p><a href="/docs/tracking-events/">Tracking guide →</a></p></article>
+    <article class="docs-feature-card"><span>03</span><h3>Build reporting</h3><p>Learn the standard reports, connect business data, and assemble role-specific tabbed dashboards.</p><p><a href="/docs/dashboards/">Dashboard guide →</a></p></article>
+    <article class="docs-feature-card"><span>04</span><h3>Operate safely</h3><p>Understand the privacy boundary, configure retention, monitor jobs, back up state, and diagnose failures.</p><p><a href="/docs/privacy-security/">Privacy and security →</a></p></article>
+</div>
+
+<h2 id="what-it-does">What the application does</h2>
+<p>The application collects events from sites you register, processes them through a queue, and presents the resulting traffic, engagement, campaign, conversion, journey, and retention reports. You can then combine those native reports with metrics from PostgreSQL, MySQL, or CSV files.</p>
+
+<div class="docs-feature-grid">
+    <article class="docs-feature-card"><span>◉</span><h3>Measure</h3><p>Pageviews, visitors, sessions, sources, devices, geography, engagement, campaigns, events, and traffic quality.</p></article>
+    <article class="docs-feature-card"><span>⌁</span><h3>Understand</h3><p>Conversions, ordered funnels, journeys, retention cohorts, segments, investigations, and contextual annotations.</p></article>
+    <article class="docs-feature-card"><span>▦</span><h3>Connect</h3><p>Read-only PostgreSQL and MySQL datasets, private CSV snapshots, reusable metrics, and calculated fields.</p></article>
+    <article class="docs-feature-card"><span>↗</span><h3>Communicate</h3><p>Tabbed dashboards, protected share links, exports, scheduled email reports, alerts, and a decision log.</p></article>
+</div>
+
+<h2 id="core-concepts">Core concepts</h2>
+<div class="docs-table-wrap"><table><thead><tr><th>Concept</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><strong>Organization</strong></td><td>The team boundary. An organization contains members and one or more sites.</td></tr>
+<tr><td><strong>Site</strong></td><td>A website or product origin with its own tracker key, reports, rules, sources, and dashboards.</td></tr>
+<tr><td><strong>Event</strong></td><td>A privacy-filtered pageview or interaction accepted from the registered site origin.</td></tr>
+<tr><td><strong>Object</strong></td><td>An optional, user-defined measurable item with a stable type and key. Products, content, listings, and profiles are examples rather than fixed categories.</td></tr>
+<tr><td><strong>Data source</strong></td><td>Native Privacy Analytics data, an external database, or an uploaded CSV file.</td></tr>
+<tr><td><strong>Dataset</strong></td><td>An allowed table or CSV snapshot plus a date column and reusable field definitions.</td></tr>
+<tr><td><strong>Dashboard</strong></td><td>A tabbed reporting canvas containing blocks from one or more available sources.</td></tr>
+</tbody></table></div>
+
+<h2 id="privacy-boundary">The privacy boundary</h2>
+<p>The tracker is designed to collect useful behavioral signals without building cross-site identity profiles. The server validates the registered origin, sanitizes event properties, classifies bots and internal traffic, and applies operator-controlled retention.</p>
+<p>Self-hosting gives the operator control of the infrastructure and data lifecycle. It does not make an installation legally compliant by itself. Your collection choices, notices, consent requirements, hosting location, access controls, and retention policy still need review for your organization and jurisdiction.</p>
+<p>Read <a href="/docs/privacy-security/">Privacy and security</a> for the exact collected and discarded fields, visitor and session estimation, retention controls, and operator checklist.</p>
+
+<h2 id="how-to-use-these-docs">How to use these docs</h2>
+<ol class="docs-steps">
+    <li><strong>Choose a deployment path.</strong><p>Review <a href="/docs/requirements/">server requirements</a>, then install on any Linux server or use Laravel Forge.</p></li>
+    <li><strong>Create the first workspace.</strong><p>Claim the protected installer, register a site, and add the generated tracker snippet.</p></li>
+    <li><strong>Model the questions your team asks.</strong><p>Define events, conversions, funnels, external metrics, and calculated fields.</p></li>
+    <li><strong>Build a repeatable reporting workflow.</strong><p>Create dashboards, subscribe to meaningful alerts, and record decisions beside the evidence.</p></li>
+</ol>
+
+<h2 id="navigation-map">Where to find things</h2>
+<p>The application sidebar is grouped by purpose. <strong>Analytics</strong> contains the standard traffic and behavior reports. <strong>Discover</strong> contains investigations, journeys, retention, optional Object Analytics, decisions, and custom dashboards. <strong>Configuration</strong> contains tracking rules, external sources, alerts, data quality, and site settings. System administrators also see <strong>System health</strong>.</p>
+
+<h2 id="first-success-checklist">Your first successful setup</h2>
+<ul>
+    <li>The public and private health endpoints return a successful response.</li>
+    <li>The installer is closed and the first administrator can sign in.</li>
+    <li>The registered site shows <strong>Tracker connected</strong>.</li>
+    <li>A real pageview and one meaningful event appear in reports.</li>
+    <li>The worker and scheduler show current heartbeats in System health.</li>
+    <li>Backups are copied off the application server and a restore procedure has been tested.</li>
+</ul>

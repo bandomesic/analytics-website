@@ -1,0 +1,84 @@
+<p class="docs-kicker">Managed server</p>
+<h1>Laravel Forge</h1>
+<p class="docs-lead">On Forge, use Docker Compose for the application runtime and let Forge manage the Ubuntu server, repository checkout, Nginx, TLS, firewall, and deployment trigger.</p>
+
+<div class="docs-callout"><span>i</span><p>The application requires PHP 8.5. Docker is the recommended Forge path because it supplies the tested PHP version together with PostgreSQL 18, Redis 8, Horizon, and the scheduler.</p></div>
+
+<h2 id="architecture">Deployment architecture</h2>
+<div class="docs-code"><pre><code>Internet → Forge Nginx and TLS → 127.0.0.1:8080 → app
+                                                     ↳ PostgreSQL
+                                                     ↳ Redis
+                                                     ↳ Horizon
+                                                     ↳ scheduler</code></pre></div>
+
+<h2 id="provision-forge">Provision the server and site</h2>
+<ol class="docs-steps">
+    <li><strong>Create an Ubuntu 24.04 server.</strong><p>Use at least two CPU cores and 4 GB of memory as a starting point.</p></li>
+    <li><strong>Install Docker from its official apt repository.</strong><p>Add the <code>forge</code> user to the <code>docker</code> group and reconnect.</p></li>
+    <li><strong>Create the site and connect the repository.</strong><p>Keep the site's web directory set to <code>/public</code>.</p></li>
+    <li><strong>Create and edit <code>.env</code>.</strong><p>Use <code>.env.example</code> as the starting point in Forge’s Environment editor for a new installation. Preserve existing secrets. Set the public HTTPS URL, enable secure cookies, and configure mail. The deployment script runs <code>./bin/setup</code> to fill missing or empty secrets while preserving the shared environment symlink.</p></li>
+</ol>
+<p>Do not create a Forge database, regular queue worker, Horizon daemon, or scheduled job for this Docker deployment. Compose already owns those services.</p>
+
+<h2 id="forge-nginx">Configure Forge Nginx</h2>
+<p>Replace the site's main <code>location /</code> block with the reverse-proxy configuration from the general installation guide. Add <code>client_max_body_size 8m;</code> in the server block for CSV uploads. Save the configuration, install a Let's Encrypt certificate in Forge, and enable HTTPS redirection.</p>
+
+<h2 id="deployment-script">Deployment script</h2>
+<p>Replace Forge’s entire native Laravel deployment script with this Docker release script. Do not run host Composer, npm, Artisan migrations, or <code>$RESTART_QUEUES()</code>.</p>
+<div class="docs-code"><pre><code>set -e
+
+$CREATE_RELEASE()
+
+cd "$FORGE_RELEASE_DIRECTORY"
+export IMAGE_TAG="release-$(basename "$FORGE_RELEASE_DIRECTORY")"
+
+./bin/setup
+
+# All application services use this same image; build it once.
+docker compose build --pull app
+
+if ! docker compose up -d --no-build --remove-orphans --wait --wait-timeout 180; then
+    docker compose ps -a
+    docker compose logs --tail=100 init postgres app worker scheduler
+    exit 1
+fi
+
+docker compose exec -T app php artisan optimize
+
+$ACTIVATE_RELEASE()</code></pre></div>
+<p>All application services share one image. The Dockerfile creates storage and cache directories before Composer boots Laravel, and the build excludes Forge’s host storage symlinks. The initializer runs migrations; a failed startup prints container logs. No separate Forge database is needed.</p>
+<p>Compose selects PostgreSQL and ignores stale <code>DB_URL</code> values. Before first startup, choose the database username, name and password. An existing database keeps its original credentials even after environment values change.</p>
+<p>Release activation does not make container replacement zero-downtime. Brief interruptions are possible, and reverting Forge’s current symlink does not roll back containers or migrations. Avoid simultaneous deployments.</p>
+
+<h2 id="https-proxy">HTTPS and trusted proxies</h2>
+<p>Keep <code>APP_URL</code> on HTTPS and set <code>SESSION_SECURE_COOKIE=true</code>. Forge Nginx must forward <code>proxy_set_header X-Forwarded-Proto $scheme;</code>. After the first start creates the network, inspect its gateway:</p>
+<div class="docs-code"><pre><code>docker network inspect privacy-analytics_default</code></pre></div>
+<p>Find <code>IPAM.Config.Gateway</code> and set Forge’s <code>TRUSTED_PROXIES</code> to that address, then redeploy. For a standard Docker bridge it may be <code>172.18.0.1</code>; use the actual value. Do not trust every address. Without proxy trust, the browser may block HTTP stylesheets and scripts on the HTTPS page.</p>
+
+<h2 id="first-start">First start and verification</h2>
+<div class="docs-code"><pre><code>cd /home/forge/analytics.example.com/current
+export IMAGE_TAG="release-$(basename "$(pwd -P)")"
+docker compose ps
+docker compose logs init
+curl --fail http://127.0.0.1:8080/health</code></pre></div>
+<p>Run the deployment script first, then use these checks from the active release. To investigate a failed deployment, use its release directory and image tag instead. After Forge has issued the certificate, verify the public health URL and complete <code>/install</code>. Enable quick deployments only when every push to the selected branch should go directly to production.</p>
+
+<h2 id="database-recovery">Database authentication recovery</h2>
+<p>If startup times out, read <code>docker logs --tail 200 privacy-analytics-init-1</code>. A healthy database probe does not prove that application credentials work. PostgreSQL initializes roles only when the volume is empty; current container environment settings do not prove a role exists.</p>
+<p>Find the original <code>DB_USERNAME</code> in your installation records. In an interactive SSH terminal, replace <code>original_user</code> below:</p>
+<div class="docs-code"><pre><code>docker exec -it privacy-analytics-postgres-1 psql -U original_user -d postgres</code></pre></div>
+<p>At the PostgreSQL prompt, inspect the roles and databases. If needed, set that user’s password:</p>
+<div class="docs-code"><pre><code>\du
+\l
+\password original_user
+\q</code></pre></div>
+<p>Set Forge’s <code>DB_USERNAME</code> to the existing role, <code>DB_DATABASE</code> to the existing application database and <code>DB_PASSWORD</code> to the password entered above, then redeploy. An installation initialized with user <code>forge</code> may have neither an <code>analytics</code> nor a <code>postgres</code> role. Do not reset the volume to fix credentials.</p>
+
+<h2 id="forge-backups">Backups on Forge</h2>
+<p>Forge's database backup feature cannot see PostgreSQL inside the supplied Compose stack. Run <code>./bin/backup</code>, move the completed directory to encrypted off-site storage, and regularly test a restore.</p>
+
+<div class="docs-callout warning"><span>!</span><p>Never run <code>docker compose down -v</code> in production. The <code>-v</code> option deletes the PostgreSQL, Redis, and private application-storage volumes.</p></div>
+
+<h2 id="native-forge">Native Forge alternative</h2>
+<p>If Forge offers PHP 8.5 on the selected server, you may use host PostgreSQL, host Redis, PHP-FPM, a Forge Horizon daemon, and Forge's minutely Laravel scheduler. Set database and Redis hosts to <code>127.0.0.1</code>, build assets with Node 22.12 or newer, and use the native commands from the installation guide.</p>
+<p>The repository also contains a detailed operator reference in <code>docs/forge.md</code>.</p>

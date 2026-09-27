@@ -1,0 +1,59 @@
+<p class="docs-kicker">Using the app</p>
+<h1>Your first workspace</h1>
+<p class="docs-lead">A useful workspace starts with one correctly registered site, a verified tracker, and a small set of events tied to real product questions.</p>
+
+<h2 id="complete-setup">Complete the protected setup</h2>
+<p>The installer creates the first administrator, organization, and site in one transaction. Use the exact site origin, including <code>https://</code> and any production subdomain. Requests from other origins are rejected.</p>
+<p>After setup, sign in and open the site from <strong>Sites</strong>. The Overview page shows whether the tracker has sent its first pageview.</p>
+
+<h2 id="install-tracker">Install the tracker</h2>
+<p>Open <strong>Site settings</strong> and find <strong>Installation snippet</strong>. Copy the generated script into the tracked website's HTML, normally just before the closing <code>&lt;/head&gt;</code> tag or through its tag/template system.</p>
+<p>Open the tracked website in a normal browser tab, navigate between pages, then return to Privacy Analytics. The status changes from <strong>Waiting for first pageview</strong> to <strong>Tracker connected</strong> after queued processing completes.</p>
+
+<div class="docs-callout"><span>i</span><p>The snippet already contains the public site identity and collection endpoint. Do not copy a snippet from one site into another registered origin.</p></div>
+
+<h2 id="automatic-events">Choose automatic events</h2>
+<p>Open <strong>Tracking & events</strong> to control automatic interaction collection. Enable only signals your team will use. Clear event names make reports, conversions, funnels, alerts, and dashboards easier to understand later.</p>
+
+<h3 id="custom-events">Add events from application code</h3>
+<p>For interactions your product already knows about, call the tracker directly. Use stable, action-oriented names and non-personal properties:</p>
+<div class="docs-code"><pre><code>window.privacyAnalytics?.track('trial_started', {
+    plan: 'team',
+    source: 'pricing_page',
+});</code></pre></div>
+<p>The <a href="/docs/tracking-events/">Tracking and events guide</a> covers allowed values, automatic events, single-page navigation, privacy filtering, rule publishing, and verification.</p>
+
+<h2 id="visual-designer">Use the Visual Event Designer</h2>
+<p>The Visual Designer opens the registered website with an authenticated, short-lived design session. It can create a general interaction rule or an optional object mapping for any item type you define.</p>
+<ol class="docs-steps">
+    <li><strong>Open Tracking & events.</strong><p>Select <strong>Open Visual Designer</strong>. The target must match the registered site origin.</p></li>
+    <li><strong>Choose an element.</strong><p>Prefer a stable ID or data attribute over layout-dependent selectors.</p></li>
+    <li><strong>Choose the measurement.</strong><p>Name a general event by intent, or choose <strong>Reusable object</strong> to measure individual items across pages and lists.</p></li>
+    <li><strong>Test and save.</strong><p>General rules are saved as drafts for review. Object mappings can be published from the designer. The tracker fetches configuration remotely.</p></li>
+</ol>
+
+<h2 id="object-analytics">Add Object Analytics only when useful</h2>
+<p>Standard page, event, goal, and funnel reports are sufficient for many sites. Use <strong>Object analytics</strong> when you need performance histories for individual products, content, courses, listings, profiles, campaigns, or another type from your own domain.</p>
+<p>Object types are free-form. The templates describe URL and page structures rather than requiring company, job, event, or ecommerce models. See the <a href="/docs/entity-analytics/">Object Analytics guide</a> for wildcards, repeating cards, nested relationships, regular expressions, automatic discovery, and portal access.</p>
+
+<h2 id="conversions-funnels">Define conversions and funnels</h2>
+<p>Open <strong>Goals & funnels</strong>. A conversion gives a business name to an important event. A funnel defines an ordered sequence of page and event steps, such as pricing page → signup started → account created.</p>
+<p>Keep funnels focused on one decision. Long funnels become difficult to interpret when visitors can legitimately take several paths.</p>
+
+<h2 id="page-groups">Create page groups</h2>
+<p>Page groups combine URL patterns into useful content or product areas. They help answer questions such as “How does documentation perform?” or “Which product area gets the most engagement?” without editing every report.</p>
+
+<h2 id="internal-traffic">Classify internal traffic</h2>
+<p>In <strong>Site settings</strong>, add office or VPN network addresses under <strong>Internal traffic</strong>. Matching activity remains classified for inspection but is excluded from standard reports by default.</p>
+
+<h2 id="invite-workflow">Organizations and access</h2>
+<p>Organizations provide the tenant boundary for sites and members. Owners and administrators can change site configuration; members can view the sites granted through their organization. System administration remains separate from organization membership.</p>
+
+<h2 id="first-week-checklist">First-week checklist</h2>
+<ol class="docs-steps">
+    <li><strong>Confirm normal traffic.</strong><p>Compare pageview volume with a known operational signal and investigate unexpected gaps.</p></li>
+    <li><strong>Exclude your team.</strong><p>Add office and VPN ranges, then confirm internal traffic appears in traffic-quality reporting.</p></li>
+    <li><strong>Name outcomes.</strong><p>Create a few conversions for events that represent real product or business success.</p></li>
+    <li><strong>Add context.</strong><p>Annotate launches, campaigns, incidents, and measurement changes.</p></li>
+    <li><strong>Check operations.</strong><p>Review Data quality and System health before sharing conclusions from the first reports.</p></li>
+</ol>

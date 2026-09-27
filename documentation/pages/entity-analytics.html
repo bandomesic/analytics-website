@@ -1,0 +1,216 @@
+<p class="docs-kicker">Optional measurement for any reusable object</p>
+<h1>Object analytics</h1>
+<p class="docs-lead">Object analytics is a general-purpose layer for comparing individual things your product presents. You define the types yourself, and you can ignore this feature when page, event, goal, and funnel analytics already answer your questions.</p>
+
+<div class="docs-callout success"><span>✓</span><p><strong>Start with standard analytics.</strong> Add Object Analytics only when you need to compare individual items, preserve their history, model parent and child relationships, or give someone access to one focused report.</p></div>
+
+<div class="docs-callout"><span>▶</span><p><strong>Prefer to learn by doing?</strong> Open the <a href="/docs/tutorials/#object-collections">interactive tutorials</a> for animated walkthroughs of collections, repeating cards, nested objects, and regular expressions.</p></div>
+
+<h2 id="when-to-use">When to use Object Analytics</h2>
+<div class="docs-table-wrap"><table><thead><tr><th>Question</th><th>Best feature</th></tr></thead><tbody>
+<tr><td>How many people visited a URL?</td><td>Pages in Overview, Audience, or Engagement</td></tr>
+<tr><td>Did visitors complete an important action?</td><td>Events, conversions, and funnels</td></tr>
+<tr><td>How does one item perform compared with other items of the same or different types?</td><td>Object Analytics</td></tr>
+<tr><td>How did the same item perform last year?</td><td>Object Analytics with year-over-year comparison</td></tr>
+<tr><td>Should an external viewer see a report for one item only?</td><td>Object Analytics portal access</td></tr>
+</tbody></table></div>
+
+<h2 id="concepts">How objects work</h2>
+<p>An object has a display name, a type you choose, a stable external key, and an optional parent. The external key connects activity to one specific object.</p>
+<div class="docs-callout"><span>i</span><p><strong>No fixed taxonomy.</strong> Types such as <code>product</code>, <code>article</code>, <code>course</code>, <code>listing</code>, <code>profile</code>, or <code>campaign</code> are examples only. The application does not limit you to those names.</p></div>
+
+<h3 id="object-identity">Choose a durable identity</h3>
+<p>The type and external key together identify an object within one site. Use a key that remains stable when its display name, URL title, price, category, or owner changes. Database IDs and permanent slugs work well. Avoid names, email addresses, temporary positions, or values that contain personal data.</p>
+<div class="docs-code"><pre><code>type: product
+external key: sku-10042
+display name: Trail Backpack 35L</code></pre></div>
+<p>The same key can exist under different types. For example, <code>course:foundations</code> and <code>article:foundations</code> are separate objects.</p>
+
+<h2 id="no-code-mapping">Track a whole collection without code</h2>
+<p>After the base tracker is installed, a site manager can create optional object mappings from <strong>Tracking &amp; events</strong>. The tracker downloads published mappings automatically, so adding another object does not require another deployment or one-to-one setup.</p>
+<div class="docs-table-wrap"><table><thead><tr><th>Website structure</th><th>Mapping</th><th>Result</th></tr></thead><tbody>
+<tr><td>One object per URL</td><td><code>/items/*</code></td><td><code>/items/item-123</code> becomes object ID <code>item-123</code>.</td></tr>
+<tr><td>Nested objects</td><td><code>/collections/*/items/*</code></td><td>Capture group 1 can identify the parent and group 2 the child.</td></tr>
+<tr><td>Many cards on one page</td><td>Card selector plus link pattern <code>/items/*</code></td><td>Each visible or clicked card uses the ID from its own link.</td></tr>
+<tr><td>Custom URL formats</td><td>JavaScript-compatible regular expression</td><td>Choose which capture group contains the stable ID.</td></tr>
+</tbody></table></div>
+<p>Use the Visual Designer to point at a card, choose <strong>Reusable object</strong>, enter your own type, and publish a mapping. The manual mapper also supports fixed IDs and IDs stored in HTML attributes. Objects are created automatically when their first valid mapped event is aggregated.</p>
+
+<h3 id="wildcards">Wildcard rules</h3>
+<ul>
+    <li><code>*</code> captures one path segment. <code>/items/*</code> matches <code>/items/item-123</code>.</li>
+    <li>Several wildcards create several capture groups from left to right. In <code>/collections/*/items/*</code>, group 1 is the collection and group 2 is the item.</li>
+    <li><code>**</code> captures the remaining path, including slashes. Use it only when the stable key intentionally contains nested segments.</li>
+    <li>Query strings and fragments do not take part in path matching.</li>
+</ul>
+
+<h3 id="mapping-methods">Choose how the object ID is found</h3>
+<div class="docs-table-wrap"><table><thead><tr><th>ID source</th><th>Use it when</th><th>Example</th></tr></thead><tbody>
+<tr><td><strong>Current page URL</strong></td><td>Each object has a detail page.</td><td><code>/products/*</code></td></tr>
+<tr><td><strong>Link inside an element</strong></td><td>A listing page contains many cards or rows.</td><td>Selector <code>.result-card</code> with link pattern <code>/catalog/*</code></td></tr>
+<tr><td><strong>Element attribute</strong></td><td>The page already exposes a stable, non-personal identifier.</td><td><code>data-item-id="sku-10042"</code></td></tr>
+<tr><td><strong>Fixed ID</strong></td><td>One element or page always belongs to the same object.</td><td>A permanent campaign banner</td></tr>
+</tbody></table></div>
+
+<h3 id="regex">Regular expressions</h3>
+<p>Use a JavaScript-compatible regular expression only when a wildcard cannot describe the URL or attribute. Enter it without delimiters and select the capture group containing the stable object key.</p>
+<div class="docs-code"><pre><code>Pattern: ^/store/[a-z]{2}/p-([A-Za-z0-9_-]+)$
+URL:     /store/en/p-sku-10042
+Group 1: sku-10042</code></pre></div>
+<p>Prefer wildcards when possible because they are easier for another administrator to review later.</p>
+
+<h2 id="visual-designer">Create a mapping with the Visual Designer</h2>
+<ol class="docs-steps">
+    <li><strong>Open Tracking &amp; events.</strong><p>Select <strong>Open Visual Designer</strong>. The target page must use the registered site origin.</p></li>
+    <li><strong>Select one representative element.</strong><p>Choose the card, row, link, button, or form that represents the object action.</p></li>
+    <li><strong>Choose Reusable object.</strong><p>Enter any lowercase object type that fits your product. The field is intentionally free-form.</p></li>
+    <li><strong>Describe the ID.</strong><p>Provide a wildcard or regular expression for the link inside the selected element.</p></li>
+    <li><strong>Choose the action and trigger.</strong><p>For example, record an impression when a card becomes visible or a link click when it is selected.</p></li>
+    <li><strong>Test and publish.</strong><p>Test activity remains inside the designer. Publishing makes the mapping available to the installed tracker immediately.</p></li>
+</ol>
+
+<h2 id="manual-mapping">Create a mapping in the application</h2>
+<p>Open <strong>Tracking &amp; events</strong>, scroll past general rules and automatic events, and expand <strong>Create an object mapping</strong>. The four templates describe page structure rather than business categories:</p>
+<ul>
+    <li><strong>Detail pages</strong> extracts one object ID from each matching page URL.</li>
+    <li><strong>Repeating cards</strong> extracts a different ID from the link inside every matching element.</li>
+    <li><strong>Nested objects</strong> captures a child object and its parent from the same URL.</li>
+    <li><strong>Custom structure</strong> starts with regular-expression extraction.</li>
+</ul>
+<p>Templates leave <strong>Object type</strong> blank. Replace every example path and selector with values from your own site before publishing.</p>
+
+<h3 id="mapping-fields">Mapping field reference</h3>
+<div class="docs-table-wrap"><table><thead><tr><th>Field</th><th>Purpose</th></tr></thead><tbody>
+<tr><td>Mapping name</td><td>An internal description for administrators.</td></tr>
+<tr><td>Object type</td><td>Your lowercase type identifier, such as <code>product</code> or a custom domain term.</td></tr>
+<tr><td>Record as</td><td>The object action added to reports.</td></tr>
+<tr><td>When it happens</td><td>Page open, visibility, click, or form submission.</td></tr>
+<tr><td>Page URL pattern</td><td>Limits where the mapping runs and can also extract IDs.</td></tr>
+<tr><td>Element selector</td><td>Required for visibility, click, and form triggers.</td></tr>
+<tr><td>Display-name selector</td><td>Optionally reads a human-readable label from the selected object.</td></tr>
+<tr><td>ID source and capture number</td><td>Defines where the stable key comes from and which captured value to use.</td></tr>
+<tr><td>Parent object</td><td>Optionally relates the discovered child to another user-defined type.</td></tr>
+<tr><td>Surface and placement</td><td>Describe where the object was presented for report breakdowns.</td></tr>
+<tr><td>Visibility threshold and duration</td><td>Prevent an impression until enough of an element was visible for long enough.</td></tr>
+<tr><td>Send once per page</td><td>Prevents duplicate actions for the same mapped object during one page lifecycle.</td></tr>
+</tbody></table></div>
+
+<h2 id="examples">Common structures</h2>
+<h3>Detail pages</h3>
+<div class="docs-code"><pre><code>Object type: product
+Action: view
+Trigger: page opens
+Page pattern: /products/*
+ID source: current page URL
+Capture group: 1</code></pre></div>
+
+<h3>Cards on a listing page</h3>
+<div class="docs-code"><pre><code>Object type: article
+Action: impression
+Trigger: element becomes visible
+Page pattern: /library
+Element selector: .article-card
+ID source: link inside selected element
+Link pattern: /articles/*
+Display-name selector: .article-title</code></pre></div>
+
+<h3>Parent and child objects</h3>
+<div class="docs-code"><pre><code>Page pattern: /courses/*/lessons/*
+Object type: lesson
+Object capture group: 2
+Parent type: course
+Parent capture group: 1</code></pre></div>
+<p>These examples demonstrate mechanics only. Replace the types, paths, selectors, actions, and labels with your own product model.</p>
+
+<h2 id="lifecycle">What happens after publishing</h2>
+<ol class="docs-steps">
+    <li><strong>The tracker downloads the configuration.</strong><p>No additional website deployment is needed after the base tracker is installed.</p></li>
+    <li><strong>A matching action occurs.</strong><p>The browser extracts and validates the object key before sending an object event.</p></li>
+    <li><strong>The server sanitizes and queues the event.</strong><p>Origin checks, bot classification, traffic classification, and privacy filtering still apply.</p></li>
+    <li><strong>The object is discovered.</strong><p>If the type and key do not exist yet, the rollup creates the object automatically. A configured parent is created or linked at the same time.</p></li>
+    <li><strong>Aggregates become reportable.</strong><p>Object Analytics, comparisons, dashboards, and scoped reports use the daily metrics.</p></li>
+</ol>
+
+<h2 id="actions">Object actions</h2>
+<div class="docs-table-wrap"><table><thead><tr><th>Action</th><th>Typical meaning</th></tr></thead><tbody>
+<tr><td>Impression</td><td>The object became meaningfully visible.</td></tr>
+<tr><td>View</td><td>The visitor opened its detail experience.</td></tr>
+<tr><td>Interaction</td><td>The visitor used a meaningful control owned by the object.</td></tr>
+<tr><td>Link click</td><td>The visitor selected a link associated with the object.</td></tr>
+<tr><td>Conversion</td><td>A defined outcome was completed for the object.</td></tr>
+<tr><td>Share</td><td>The visitor used a sharing action.</td></tr>
+<tr><td>Save</td><td>The visitor saved, bookmarked, or favorited it.</td></tr>
+</tbody></table></div>
+
+<h2 id="register">Register an object manually</h2>
+<ol class="docs-steps">
+    <li><strong>Open Object analytics.</strong><p>Select a site and choose <strong>Object analytics</strong> from the Discover navigation.</p></li>
+    <li><strong>Choose your type.</strong><p>Use any stable lowercase name that describes the object in your product.</p></li>
+    <li><strong>Set an external key.</strong><p>Use an identifier that will remain stable if the display name changes, such as a database ID or slug.</p></li>
+    <li><strong>Add a parent when useful.</strong><p>Parent relationships make portfolios and related objects easier to understand.</p></li>
+</ol>
+
+<h2 id="events">Developer API</h2>
+<p>The API is useful for application state that cannot be represented by a URL, element, or attribute. Most object tracking can use no-code mappings instead.</p>
+<p>The tracker accepts seven standard object actions: impression, view, interaction, link click, conversion, share, and save.</p>
+<pre><code>privacyAnalytics.trackEntity('view', {
+  type: 'your_object_type',
+  id: 'item-123'
+}, {
+  surface: 'catalog',
+  placement: 'featured',
+  position: 3
+});</code></pre>
+<p>Use <code>surface</code> to identify the page, screen, list, or product area. Use <code>placement</code> for a more specific position such as featured results, related content, or the primary card.</p>
+
+<h2 id="impressions">Collect credible impressions</h2>
+<p>An impression should represent content that became visible, rather than content that merely existed in the page markup. The tracker can observe an element and send one impression after at least half of it remains visible for one second.</p>
+<pre><code>const card = document.querySelector('[data-item-id="item-123"]');
+
+const stopObserving = privacyAnalytics.observeEntity(card, {
+  type: 'your_object_type',
+  id: 'item-123'
+}, {
+  surface: 'catalog'
+});</code></pre>
+<p>Call <code>stopObserving()</code> if a single-page application removes the element before the page changes.</p>
+
+<h2 id="metrics">Metrics and comparisons</h2>
+<ul>
+    <li><strong>Impressions</strong> count visible presentations of the object.</li>
+    <li><strong>Daily unique reach</strong> sums privacy-safe distinct visitor estimates calculated within each day.</li>
+    <li><strong>Views</strong> count opens of the object's detail experience.</li>
+    <li><strong>Click-through rate</strong> divides link clicks by impressions.</li>
+    <li><strong>Engagement rate</strong> compares meaningful interactions with impressions.</li>
+    <li><strong>Conversions</strong> count business outcomes attributed to the object.</li>
+</ul>
+<p>Use previous-period, previous-year, or custom comparisons. Each object also retains daily aggregates for a five-year year-over-year view, independently of raw-event retention.</p>
+
+<h2 id="portfolio">Object reports</h2>
+<p>The overview compares every registered object and can filter by your object types. Open one to see its time series, surface and placement breakdown, annual history, tracking instructions, related objects, and portal access.</p>
+
+<h2 id="verify">Verify a mapping</h2>
+<ol class="docs-steps">
+    <li><strong>Confirm the base tracker.</strong><p>The site should show <strong>Tracker connected</strong> before you troubleshoot an object mapping.</p></li>
+    <li><strong>Visit a matching page.</strong><p>Use a real URL that matches the page pattern and perform the configured action.</p></li>
+    <li><strong>Check the extracted value.</strong><p>Confirm the wildcard or regular-expression capture produces the expected stable key without spaces or personal data.</p></li>
+    <li><strong>Allow queued processing.</strong><p>New objects appear after the event worker and daily rollup process the accepted action.</p></li>
+    <li><strong>Open Object Analytics.</strong><p>Filter by the configured type and confirm the object, action count, surface, and placement.</p></li>
+</ol>
+
+<h3 id="mapping-troubleshooting">If an object does not appear</h3>
+<ul>
+    <li>Confirm the mapping is active and its page pattern matches the path exactly.</li>
+    <li>For cards, make sure the selected element contains a link whose path matches the link pattern.</li>
+    <li>For visibility, confirm the element reaches the configured percentage and duration.</li>
+    <li>For regular expressions, test the selected capture group and use JavaScript-compatible syntax.</li>
+    <li>Check Data quality and System health for ingestion, worker, or scheduler problems.</li>
+    <li>Remember that probable bots and non-human traffic do not create object aggregates.</li>
+</ul>
+
+<h2 id="portal">Customer portal access</h2>
+<p>A site manager can grant an existing user access to one object. That user receives a focused report with date comparisons and historical performance, without access to the internal site navigation, other objects, or organization analytics.</p>
+<div class="docs-callout warning"><span>!</span><p><strong>Access is object scoped.</strong> Grant access only to the object the customer should see. Organization owners and administrators retain access through their normal site permissions.</p></div>
+
+<h2 id="privacy">Privacy model</h2>
+<p>Object events use the same sanitization, bot filtering, internal-traffic classification, and pseudonymous daily aggregation as other analytics events. Object IDs should identify content or business objects. Do not place names, email addresses, account secrets, or other personal data in object properties.</p>

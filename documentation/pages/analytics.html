@@ -1,0 +1,71 @@
+<p class="docs-kicker">Using the app</p>
+<h1>Analytics reports</h1>
+<p class="docs-lead">The standard reports move from “what changed?” to “who and what contributed?” and finally to “what should we do next?” Use the same date range while moving between sections so the story remains comparable.</p>
+
+<h2 id="date-range">Date ranges and comparison</h2>
+<p>Use the date control on a report to select Today, Yesterday, Last 7 days, Last 30 days, Last 90 days, Last 365 days, This month, Last month, or a custom range. When comparison is enabled, charts and changes use the equivalent previous period.</p>
+<p>Daily rollups use UTC. Very recent events may appear first in realtime views and then in aggregated reports after background processing.</p>
+
+<h2 id="metric-definitions">Metric definitions</h2>
+<div class="docs-table-wrap"><table><thead><tr><th>Metric</th><th>Meaning</th><th>Interpretation note</th></tr></thead><tbody>
+<tr><td><strong>Pageviews</strong></td><td>Accepted pageview events.</td><td>One browser can create many pageviews in a session.</td></tr>
+<tr><td><strong>Visitors</strong></td><td>Estimated unique browsers in the selected period.</td><td>Daily rotating estimates are intentionally not durable identities.</td></tr>
+<tr><td><strong>Sessions</strong></td><td>Estimated visits separated by a 30-minute inactivity timeout.</td><td>A returning visitor may create several sessions.</td></tr>
+<tr><td><strong>Engagement</strong></td><td>Whole seconds while the page is visible and the browser is focused.</td><td>It estimates active foreground time, not exact attention.</td></tr>
+<tr><td><strong>Conversion rate</strong></td><td>Eligible sessions that reached a configured conversion.</td><td>Read it together with the absolute conversion count.</td></tr>
+</tbody></table></div>
+
+<h2 id="overview">Overview</h2>
+<p>Overview is the daily starting point. It combines pageviews, estimated visitors, sessions, engagement, conversions, traffic trends, top pages, and top sources. Use it to find the signal that deserves a deeper report.</p>
+
+<h2 id="audience">Audience</h2>
+<p>Audience explains the shape of traffic:</p>
+<ul>
+    <li><strong>Geography</strong> uses the locally installed GeoIP database when available.</li>
+    <li><strong>Devices</strong> groups device type, browser, and operating system.</li>
+    <li><strong>Pages and page groups</strong> show where attention is concentrated.</li>
+    <li><strong>Traffic quality</strong> separates human, probable bot, monitoring, internal, and unknown traffic.</li>
+</ul>
+
+<h2 id="acquisition">Acquisition</h2>
+<p>Acquisition shows how visits begin. Referrers are classified into direct, organic, social, email, paid, and referral traffic. Campaign tables use standard UTM parameters so teams can compare source, medium, and campaign consistently.</p>
+<p>Use this page to evaluate channel mix, campaign reach, and landing-page quality. A traffic increase is more useful when the next reports show whether those visitors engaged or converted.</p>
+
+<h2 id="engagement">Engagement</h2>
+<p>Engagement combines active time and meaningful browser interactions. It helps distinguish a loaded page from a page someone actually used. Review event totals, engagement trends, and content performance together.</p>
+
+<h2 id="goals-funnels">Goals and funnels</h2>
+<p>Conversions count the important events defined for a site and calculate rates against eligible sessions. Funnels show how many sessions reached each ordered page or event step, including completion rate and drop-off between steps.</p>
+
+<h2 id="insights">Insights</h2>
+<p>Insights highlights notable movement so you do not need to scan every table manually. Treat an insight as a starting point: confirm it against the relevant report, segment, date range, and known business context before acting.</p>
+
+<h2 id="explore">Explore</h2>
+<p>Explore is the ad hoc analysis workspace. Choose a metric, dimension, filters, and date range to answer a specific question. Useful explorations can be saved as dashboard blocks, which turns one-time analysis into a repeatable report.</p>
+
+<h2 id="journeys">Journeys</h2>
+<p>Journeys reveal common sequences of pages and events. Use them to understand entry paths, movement toward an outcome, and where sessions stop. Combine journey patterns with a focused funnel when the order matters to the product decision.</p>
+
+<h2 id="retention">Retention</h2>
+<p>Retention groups sessions into cohorts and shows whether visitors return in later periods. Compare product releases, acquisition channels, or important audience segments over time rather than relying on one aggregate return rate.</p>
+
+<h2 id="object-analytics">Object Analytics</h2>
+<p>Object Analytics is optional and uses types that you define. It compares impressions, views, interactions, clicks, conversions, shares, saves, reach, surfaces, placements, and year-over-year performance for individual objects. Use it when a page-level total cannot answer which specific item performed best. Continue with the <a href="/docs/entity-analytics/">Object Analytics guide</a> for setup and reporting details.</p>
+
+<h2 id="reading-responsibly">Reading reports responsibly</h2>
+<ul>
+    <li>Check data quality before explaining a sudden change.</li>
+    <li>Use a complete period when comparing daily or weekly performance.</li>
+    <li>Separate internal and bot traffic from the customer story.</li>
+    <li>Add annotations for launches, campaigns, incidents, and experiments.</li>
+    <li>Record a decision only after the evidence and expected outcome are clear.</li>
+</ul>
+
+<h2 id="analysis-pattern">A practical analysis pattern</h2>
+<ol class="docs-steps">
+    <li><strong>Start with movement.</strong><p>Use Overview and comparison to identify the metric and dates that changed.</p></li>
+    <li><strong>Break down the change.</strong><p>Move to Acquisition, Audience, Engagement, or Explore while keeping the same period.</p></li>
+    <li><strong>Check behavior.</strong><p>Use funnels and journeys to see whether people reached the intended outcome.</p></li>
+    <li><strong>Validate the data.</strong><p>Check annotations, traffic quality, collection health, and period completeness.</p></li>
+    <li><strong>Make the finding repeatable.</strong><p>Save the exploration to a dashboard, create an alert or KPI, and record the decision.</p></li>
+</ol>

@@ -1,0 +1,73 @@
+<p class="docs-kicker">Deploy anywhere</p>
+<h1>Installation</h1>
+<p class="docs-lead">Use the supplied Docker Compose stack for the fastest, repeatable production installation. It runs the same PHP, PostgreSQL, Redis, worker, and scheduler layout that the project tests.</p>
+
+<h2 id="prepare-server">1. Prepare the server</h2>
+<p>Install Docker Engine, Docker Compose v2, Git, and OpenSSL. Clone the repository into an operator-owned directory:</p>
+<div class="docs-code"><pre><code>git clone https://github.com/bandomesic/analytics.git privacy-analytics
+cd privacy-analytics
+cp .env.example .env
+./bin/setup</code></pre></div>
+<p><code>bin/setup</code> creates cryptographically random values only for blank <code>APP_KEY</code>, <code>DB_PASSWORD</code>, and <code>SETUP_TOKEN</code> entries. Running it again does not rotate existing secrets.</p>
+
+<h2 id="configure-environment">2. Configure the environment</h2>
+<p>Edit <code>.env</code> before starting the containers. Keep database and Redis hostnames as their Compose service names.</p>
+<div class="docs-code"><pre><code>APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://analytics.example.com
+APP_DOMAIN=analytics.example.com
+APP_PORT=8080
+SESSION_SECURE_COOKIE=true
+TRUSTED_PROXIES=172.16.0.0/12
+
+DB_CONNECTION=pgsql
+DB_HOST=postgres
+DB_PORT=5432
+DB_DATABASE=analytics
+DB_USERNAME=analytics
+
+REDIS_HOST=redis
+REDIS_PORT=6379
+QUEUE_CONNECTION=redis</code></pre></div>
+<p>Replace the broad example proxy subnet with the dedicated Docker network range when possible. Never set <code>TRUSTED_PROXIES=*</code> on a backend that can receive untrusted traffic directly.</p>
+
+<h2 id="start-stack">3. Start the stack</h2>
+<div class="docs-code"><pre><code>docker compose up -d --build
+docker compose ps
+docker compose logs init</code></pre></div>
+<p>The initializer waits for PostgreSQL and Redis, then runs migrations. The web app, Horizon worker, and scheduler start only after the migration succeeds. Health checks can take up to two minutes during the first build.</p>
+
+<h2 id="reverse-proxy">4. Add the reverse proxy</h2>
+<p>The application listens on <code>127.0.0.1:8080</code>. Put Nginx, Caddy, Traefik, or another trusted HTTPS proxy in front of that private endpoint.</p>
+<div class="docs-code"><pre><code>location / {
+    proxy_pass http://127.0.0.1:8080;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}</code></pre></div>
+<p>If no proxy already exists, the repository includes a Caddy overlay that obtains and renews certificates:</p>
+<div class="docs-code"><pre><code>docker compose -f docker-compose.yml -f docker-compose.caddy.yml up -d --build</code></pre></div>
+<p>Only one service may own public ports 80 and 443. Do not start the Caddy overlay when the server already has Nginx, Caddy, or a hosting control panel listening on those ports.</p>
+
+<h2 id="claim-installer">5. Claim the installer</h2>
+<p>Check the private and public health endpoints, then read the setup token from the project directory:</p>
+<div class="docs-code"><pre><code>curl --fail http://127.0.0.1:8080/health
+curl --fail https://analytics.example.com/health
+grep '^SETUP_TOKEN=' .env</code></pre></div>
+<p>Open <code>https://analytics.example.com/install</code>. Enter the token, administrator details, organization, site name, and the exact HTTP or HTTPS origin of the website you will track. The installer closes permanently after completion.</p>
+
+<div class="docs-callout"><span>i</span><p>The setup token belongs in the installer form, never in a URL. Keep it out of screenshots, shell history shared with others, tickets, and logs.</p></div>
+
+<h2 id="native-installation">Native Laravel alternative</h2>
+<p>After provisioning the native dependencies from <a href="/docs/requirements/">server requirements</a>, configure <code>.env</code> for the host database and Redis services, then deploy with:</p>
+<div class="docs-code"><pre><code>composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+npm ci
+npm run build
+php artisan migrate --force --no-interaction
+php artisan optimize</code></pre></div>
+<p>Serve only <code>public/</code> through PHP-FPM 8.5. Supervise <code>php artisan horizon</code>, run <code>php artisan schedule:run</code> every minute, and restart Horizon after each deployment with <code>php artisan horizon:terminate</code>.</p>
+
+<h2 id="next-step">Next step</h2>
+<p>Continue to <a href="/docs/getting-started/">First workspace</a> to install the tracker, verify the first pageview, and configure meaningful events.</p>
