@@ -46,11 +46,12 @@ test('does not serve private files or application routes', async context => {
 });
 
 
-test('offers the demo without linking to workspace login or setup', async context => {
+test('hides unavailable demo links without linking to workspace login or setup', async context => {
     const origin = await website(context);
     const html = await (await fetch(origin)).text();
     const links = [...html.matchAll(/<a\b[^>]*href="([^"]+)"[^>]*>/g)].map(match => match[1]);
-    assert.ok(links.some(link => new URL(link, origin).pathname === '/demo'));
+    assert.ok(html.includes('hidden data-demo-link'));
+    assert.ok(!html.includes('127.0.0.1:8082'));
     for (const link of links) {
         assert.ok(!['/install', '/login', '/dashboard'].includes(new URL(link, origin).pathname), link);
     }

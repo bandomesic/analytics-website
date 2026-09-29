@@ -23,6 +23,7 @@ const files = new Map([
 files.set('/docs', ['docs/index.html', 'text/html']);
 files.set('/docs/', ['docs/index.html', 'text/html']);
 files.set('/docs/index.html', ['docs/index.html', 'text/html']);
+files.set('/docs/search-index.json', ['docs/search-index.json', 'application/json']);
 for (const slug of Object.keys(pages)) {
     const asset = [`docs/${slug}/index.html`, 'text/html'];
     for (const path of [`/docs/${slug}`, `/docs/${slug}/`, `/docs/${slug}/index.html`]) {

@@ -4,6 +4,7 @@ const root = new URL('./', import.meta.url);
 const pages = JSON.parse(await readFile(new URL('documentation/pages.json', root), 'utf8'));
 const layout = await readFile(new URL('documentation/layout.html', root), 'utf8');
 const slugs = Object.keys(pages);
+const searchIndex = {};
 const escape = value => String(value).replace(/[&<>"']/g, character => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;',
 })[character]);
@@ -28,8 +29,9 @@ ${previous ? `<a href="${pageUrl(previous)}"><small>Previous</small><span>← ${
 ${next ? `<a href="${pageUrl(next)}"><small>Next</small><span>${escape(pages[next].title)} →</span></a>` : '<span></span>'}
 </nav>`;
     const content = await readFile(new URL(`documentation/pages/${slug}.html`, root), 'utf8');
-    const replacements = { title: escape(current.title), description: escape(current.description), navigation, content, pagination };
-    const html = layout.replace(/\{\{(title|description|navigation|content|pagination)\}\}/g, (_, key) => replacements[key]);
+    searchIndex[slug] = `${current.title} ${current.description} ${current.keywords} ${content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ')}`.toLowerCase();
+    const replacements = { title: escape(current.title), description: escape(current.description), navigation, content, pagination, slug: escape(slug) };
+    const html = layout.replace(/\{\{(title|description|navigation|content|pagination|slug)\}\}/g, (_, key) => replacements[key]);
     const directory = new URL(`docs/${slug}/`, root);
     await mkdir(directory, { recursive: true });
     await writeFile(new URL('index.html', directory), html);
@@ -37,4 +39,5 @@ ${next ? `<a href="${pageUrl(next)}"><small>Next</small><span>${escape(pages[nex
         await writeFile(new URL('docs/index.html', root), html);
     }
 }
+await writeFile(new URL('docs/search-index.json', root), JSON.stringify(searchIndex));
 console.log(`Built ${slugs.length} documentation guides.`);

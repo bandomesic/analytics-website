@@ -56,7 +56,7 @@ docker compose exec -T app php artisan analytics:retention --execute</code></pre
     <li>Keep PostgreSQL, Redis, and the internal application port off the public internet.</li>
     <li>Protect <code>.env</code>, backups, connected-source credentials, and dashboard share passwords.</li>
     <li>Give external database users read-only access to selected reporting views or tables.</li>
-    <li>Review organization membership and revoke unused public dashboard shares.</li>
+    <li>Review organization membership and use short expiry periods for public dashboard shares; the current interface cannot revoke an individual link before it expires.</li>
     <li>Preserve <code>APP_KEY</code>; it protects encrypted application values such as source credentials.</li>
 </ul>
 

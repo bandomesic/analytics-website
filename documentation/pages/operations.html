@@ -44,7 +44,7 @@ curl --fail https://analytics.example.com/health</code></pre></div>
     <li>Restrict SSH, use key-based access, and apply operating-system security updates.</li>
     <li>Keep <code>APP_DEBUG=false</code> and protect <code>.env</code>.</li>
     <li>Use read-only external database credentials with narrow table access.</li>
-    <li>Review organization membership and revoke old shared dashboard links.</li>
+    <li>Review organization membership and use short expiry periods for shared dashboard links; the current interface cannot revoke an individual link before it expires.</li>
     <li>Run Composer and npm security audits during maintenance.</li>
     <li>Test backups and incident procedures instead of assuming they work.</li>
 </ul>

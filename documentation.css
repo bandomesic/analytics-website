@@ -910,12 +910,20 @@
 .tutorial-prerequisites li code { font-size: 11px; }
 .tutorial-prerequisites-note { margin: 15px 0 0; color: var(--docs-muted); font-size: 13px; line-height: 1.6; }
 
+.tutorial-topic-filters { display: none; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+.tutorial-topic-filters.is-ready { display: flex; }
+.tutorial-topic-filters button { min-height: 36px; padding: 7px 12px; border: 1px solid var(--docs-line); border-radius: 999px; background: var(--docs-panel); color: var(--docs-muted); font: inherit; font-size: 12px; font-weight: 750; cursor: pointer; }
+.tutorial-topic-filters button:hover { border-color: var(--docs-blue); color: var(--docs-blue); }
+.tutorial-topic-filters button[aria-pressed=true] { border-color: var(--docs-blue); background: var(--docs-blue-soft); color: var(--docs-blue); }
+.tutorial-topic-filters > span { margin-left: auto; color: var(--docs-muted); font-size: 12px; font-weight: 700; white-space: nowrap; }
+
 .tutorial-picker {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
     margin-top: 22px;
 }
+.tutorial-topic-filters.is-ready + .tutorial-picker { margin-top: 12px; }
 
 .tutorial-picker button {
     display: grid;
@@ -936,6 +944,7 @@
 }
 
 .tutorial-picker button:hover { border-color: color-mix(in srgb, var(--docs-blue) 55%, var(--docs-line)); transform: translateY(-2px); }
+.tutorial-picker button[hidden] { display: none; }
 .tutorial-picker button[aria-selected=true] { border-color: var(--docs-blue); box-shadow: 0 13px 34px color-mix(in srgb, var(--docs-blue) 14%, transparent); }
 
 .tutorial-picker-icon {
@@ -957,7 +966,7 @@
 .tutorial-picker em { overflow: hidden; color: var(--docs-muted); font-size: 12px; font-style: normal; text-overflow: ellipsis; white-space: nowrap; }
 .tutorial-picker button > b { align-self: start; color: var(--docs-muted); font-size: 11px; white-space: nowrap; }
 
-.tutorial-stage { margin: 22px 0 34px; }
+.tutorial-stage { margin: 17px 0 34px; }
 .tutorial-deck {
     overflow: hidden;
     border: 1px solid color-mix(in srgb, var(--docs-blue) 25%, var(--docs-line));
@@ -1173,6 +1182,13 @@
 .tutorial-checklist strong { font-size: 13px; }
 .tutorial-checklist small { color: var(--docs-muted); font-size: 11px; }
 
+.tutorial-flow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: center; gap: 9px; padding: 18px; }
+.tutorial-flow > div { display: grid; align-content: center; justify-items: start; gap: 5px; min-height: 88px; padding: 12px; border: 1px solid var(--docs-line); border-radius: 12px; background: var(--docs-panel); opacity: .68; }
+.tutorial-flow > div.is-active { border-color: var(--docs-blue); background: var(--docs-blue-soft); opacity: 1; box-shadow: 0 9px 24px color-mix(in srgb, var(--docs-blue) 15%, transparent); }
+.tutorial-flow i { color: var(--docs-blue); font-size: 11px; font-style: normal; font-weight: 850; }
+.tutorial-flow strong { color: var(--docs-text); font-size: 13px; }
+.tutorial-flow small { color: var(--docs-muted); font-size: 10px; line-height: 1.35; }
+
 .tutorial-controls { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; padding: 17px 22px; border-top: 1px solid var(--docs-line); background: color-mix(in srgb, var(--docs-panel-soft) 55%, var(--docs-panel)); }
 .tutorial-controls button { width: fit-content; min-height: 42px; padding: 0 15px; border: 1px solid var(--docs-line); border-radius: 9px; background: var(--docs-panel); color: var(--docs-text); font: inherit; font-size: 12px; font-weight: 730; cursor: pointer; }
 .tutorial-controls button:last-child { justify-self: end; border-color: var(--docs-blue); background: var(--docs-blue); color: var(--docs-panel); }
@@ -1184,8 +1200,8 @@
 @keyframes tutorial-scan { 0%, 100% { opacity: 0; transform: translateY(0); } 20%, 80% { opacity: 1; } 50% { transform: translateY(198px); } }
 @keyframes tutorial-blink { 50% { opacity: 0; } }
 @keyframes tutorial-timer { 0% { transform: scaleX(0); } 65%, 100% { transform: scaleX(1); } }
-
 @media (max-width: 760px) {
+    .tutorial-flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .tutorial-intro { grid-template-columns: 1fr; }
     .tutorial-intro > div { grid-template-columns: auto 1fr; align-items: center; text-align: left; }
     .tutorial-picker { grid-template-columns: 1fr; }

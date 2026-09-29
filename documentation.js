@@ -32,9 +32,22 @@ document.addEventListener('keydown', event => {
     }
 });
 
-search?.addEventListener('input', event => {
+let searchIndex;
+let searchRequest;
+search?.addEventListener('input', async event => {
     const query = event.target.value.trim().toLowerCase();
-    entries.forEach(entry => { entry.hidden = query !== '' && !entry.dataset.docsEntry.includes(query); });
+    if (query && !searchIndex) {
+        searchRequest ??= fetch('/docs/search-index.json').then(response => {
+            if (!response.ok) throw new Error('Documentation search is unavailable.');
+            return response.json();
+        }).catch(() => ({}));
+        searchIndex = await searchRequest;
+    }
+    if (query !== search.value.trim().toLowerCase()) return;
+    entries.forEach(entry => {
+        const slug = new URL(entry.href).pathname.split('/')[2];
+        entry.hidden = query !== '' && !(searchIndex?.[slug] ?? entry.dataset.docsEntry).includes(query);
+    });
     groups.forEach(group => { group.hidden = ![...group.querySelectorAll('[data-docs-entry]')].some(entry => !entry.hidden); });
     empty.hidden = entries.some(entry => !entry.hidden);
 });
@@ -51,13 +64,13 @@ document.querySelectorAll('.docs-code').forEach(block => {
     block.append(button);
 });
 
-const headings = [...document.querySelectorAll('[data-docs-article] > h2, [data-docs-article] > h3')];
+const headings = [...document.querySelectorAll('[data-docs-article] > h2, [data-docs-article] > h3, [data-docs-article] > .tutorial-prerequisites h2, [data-docs-article] > .tutorial-stage > .tutorial-deck > header h2')];
 const tableOfContents = document.querySelector('[data-docs-toc]');
 
 headings.forEach((heading, index) => {
     if (!heading.id) heading.id = `section-${index + 1}`;
     const link = document.createElement('a');
-    link.href = `#${heading.id}`;
+    link.href = `#${heading.closest('[data-tutorial-deck]')?.id ?? heading.id}`;
     link.textContent = heading.textContent;
     if (heading.tagName === 'H3') link.classList.add('subsection');
     tableOfContents?.append(link);
@@ -68,7 +81,7 @@ if ('IntersectionObserver' in window && headings.length) {
     const observer = new IntersectionObserver(records => {
         const visible = records.find(record => record.isIntersecting);
         if (!visible) return;
-        links.forEach(link => link.classList.toggle('active', link.hash === `#${visible.target.id}`));
+        links.forEach(link => link.classList.toggle('active', link.hash === `#${visible.target.closest('[data-tutorial-deck]')?.id ?? visible.target.id}`));
     }, { rootMargin: '-100px 0px -70% 0px' });
     headings.forEach(heading => observer.observe(heading));
 }
@@ -79,6 +92,10 @@ const tutorialDecks = [...document.querySelectorAll('[data-tutorial-deck]')];
 
 if (tutorialStage && tutorialDecks.length) {
     tutorialStage.classList.add('is-enhanced');
+    const filterBar = document.querySelector('[data-tutorial-filters]');
+    const topicFilters = [...document.querySelectorAll('[data-tutorial-topic-filter]')];
+    const filterCount = filterBar?.querySelector('[data-tutorial-filter-count]');
+    filterBar?.classList.add('is-ready');
     const positions = new Map(tutorialDecks.map(deck => [deck.dataset.tutorialDeck, 0]));
     let activeTutorial = tutorialDecks.some(deck => `#${deck.id}` === window.location.hash)
         ? tutorialDecks.find(deck => `#${deck.id}` === window.location.hash)?.dataset.tutorialDeck
@@ -99,10 +116,24 @@ if (tutorialStage && tutorialDecks.length) {
         if (progress) progress.style.width = `${((current + 1) / slides.length) * 100}%`;
         if (status) status.textContent = `Step ${current + 1} of ${slides.length}`;
         if (previous) previous.disabled = current === 0;
-        if (next) next.textContent = current === slides.length - 1 ? 'Replay tutorial ↻' : 'Next step →';
+        if (next) next.textContent = current === slides.length - 1 ? 'Start again ↻' : 'Next step →';
+    };
+
+    const setTopicFilter = topic => {
+        tutorialSelectors.forEach(selector => {
+            selector.hidden = topic !== 'all' && selector.dataset.tutorialTopic !== topic;
+        });
+        topicFilters.forEach(filter => {
+            filter.setAttribute('aria-pressed', String(filter.dataset.tutorialTopicFilter === topic));
+        });
+        const count = tutorialSelectors.filter(selector => !selector.hidden).length;
+        if (filterCount) filterCount.textContent = `${count} ${count === 1 ? 'tutorial' : 'tutorials'}`;
     };
 
     const selectTutorial = name => {
+        const selector = tutorialSelectors.find(candidate => candidate.dataset.tutorialSelect === name);
+        if (!selector) return;
+        if (selector.hidden) setTopicFilter(selector.dataset.tutorialTopic);
         activeTutorial = name;
         tutorialSelectors.forEach(selector => {
             const selected = selector.dataset.tutorialSelect === name;
@@ -116,19 +147,44 @@ if (tutorialStage && tutorialDecks.length) {
         });
     };
 
-    tutorialSelectors.forEach((selector, selectorIndex) => {
-        selector.addEventListener('click', () => selectTutorial(selector.dataset.tutorialSelect));
+    topicFilters.forEach(filter => {
+        filter.addEventListener('click', () => {
+            setTopicFilter(filter.dataset.tutorialTopicFilter);
+            const selected = tutorialSelectors.find(selector => selector.dataset.tutorialSelect === activeTutorial);
+            if (selected?.hidden) {
+                const firstVisible = tutorialSelectors.find(selector => !selector.hidden);
+                if (firstVisible) {
+                    selectTutorial(firstVisible.dataset.tutorialSelect);
+                    history.replaceState(null, '', `#tutorial-${firstVisible.dataset.tutorialSelect}`);
+                }
+            }
+        });
+    });
+
+    tutorialSelectors.forEach(selector => {
+        selector.addEventListener('click', () => {
+            selectTutorial(selector.dataset.tutorialSelect);
+            history.replaceState(null, '', `#tutorial-${selector.dataset.tutorialSelect}`);
+        });
         selector.addEventListener('keydown', event => {
             if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
             event.preventDefault();
+            const visibleSelectors = tutorialSelectors.filter(candidate => !candidate.hidden);
+            const selectorIndex = visibleSelectors.indexOf(selector);
             let nextIndex = selectorIndex;
-            if (event.key === 'ArrowLeft') nextIndex = (selectorIndex - 1 + tutorialSelectors.length) % tutorialSelectors.length;
-            if (event.key === 'ArrowRight') nextIndex = (selectorIndex + 1) % tutorialSelectors.length;
+            if (event.key === 'ArrowLeft') nextIndex = (selectorIndex - 1 + visibleSelectors.length) % visibleSelectors.length;
+            if (event.key === 'ArrowRight') nextIndex = (selectorIndex + 1) % visibleSelectors.length;
             if (event.key === 'Home') nextIndex = 0;
-            if (event.key === 'End') nextIndex = tutorialSelectors.length - 1;
-            tutorialSelectors[nextIndex].focus();
-            selectTutorial(tutorialSelectors[nextIndex].dataset.tutorialSelect);
+            if (event.key === 'End') nextIndex = visibleSelectors.length - 1;
+            visibleSelectors[nextIndex].focus();
+            selectTutorial(visibleSelectors[nextIndex].dataset.tutorialSelect);
+            history.replaceState(null, '', `#tutorial-${visibleSelectors[nextIndex].dataset.tutorialSelect}`);
         });
+    });
+
+    window.addEventListener('hashchange', () => {
+        const linkedDeck = tutorialDecks.find(deck => `#${deck.id}` === window.location.hash);
+        if (linkedDeck) selectTutorial(linkedDeck.dataset.tutorialDeck);
     });
 
     tutorialDecks.forEach(deck => {
@@ -154,5 +210,11 @@ if (tutorialStage && tutorialDecks.length) {
         if (!button?.disabled) button?.click();
     });
 
+    setTopicFilter('all');
     selectTutorial(activeTutorial);
+}
+
+const linkedTutorial = document.querySelector(`[data-tutorial-redirect][href$="${window.location.hash}"]`);
+if (linkedTutorial && window.location.hash.startsWith('#tutorial-')) {
+    window.location.replace(linkedTutorial.href);
 }

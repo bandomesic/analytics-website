@@ -30,10 +30,40 @@
     "keywords": "setup token organization site tracker snippet visual designer events object mapping"
   },
   "tutorials": {
-    "title": "Interactive tutorials",
-    "description": "Learn common workflows with animated, step-by-step walkthroughs.",
+    "title": "Tutorials",
+    "description": "Choose practical walkthroughs by topic.",
     "group": "Using the app",
-    "keywords": "tutorial walkthrough slides animation setup tracker object mapping cards nested regex visual designer"
+    "keywords": "tutorial walkthrough self-paced learning topics"
+  },
+  "tutorials-object": {
+    "title": "Object analytics tutorials",
+    "description": "Identify and map reusable objects, then read and share their reports.",
+    "group": "Tutorials",
+    "keywords": "object identity stable key mapping cards nested regex report portal impression click"
+  },
+  "tutorials-tracking": {
+    "title": "Tracking tutorials",
+    "description": "Configure events, funnels, automatic links, and troubleshoot missing data.",
+    "group": "Tutorials",
+    "keywords": "tracker event conversion funnel automatic outbound download troubleshoot"
+  },
+  "tutorials-analysis": {
+    "title": "Analysis tutorials",
+    "description": "Read campaigns, compare segments, investigate trends, and annotate changes.",
+    "group": "Tutorials",
+    "keywords": "campaign segment investigation annotation analysis"
+  },
+  "tutorials-reporting": {
+    "title": "Reporting tutorials",
+    "description": "Build and share dashboards, schedule reports, and configure alerts.",
+    "group": "Tutorials",
+    "keywords": "dashboard share expiry schedule email alert report"
+  },
+  "tutorials-data": {
+    "title": "Connected data tutorials",
+    "description": "Create CSV metrics, blend sources, and set KPI targets.",
+    "group": "Tutorials",
+    "keywords": "csv metric blend data source kpi target"
   },
   "tracking-events": {
     "title": "Tracking and events",

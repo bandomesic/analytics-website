@@ -1,11 +1,24 @@
 import { demoUrl } from './config.js';
 
-const demo = new URL(demoUrl);
-if (!['http:', 'https:'].includes(demo.protocol)) {
+const demo = demoUrl ? new URL(demoUrl) : null;
+if (demo && !['http:', 'https:'].includes(demo.protocol)) {
     throw new Error('The demo URL must use HTTP or HTTPS.');
 }
-for (const link of document.querySelectorAll('[data-demo-link]')) {
-    link.href = demo.href;
+for (const link of document.querySelectorAll('[data-demo-link], [data-app-path]')) {
+    if (!demo) {
+        link.hidden = true;
+        link.removeAttribute('href');
+        continue;
+    }
+    const path = link.dataset.appPath?.replace(/^\/demo\/?/, '') ?? '';
+    link.href = path ? new URL(path, `${demo.href.replace(/\/$/, '')}/`).href : demo.href;
+    link.hidden = false;
+}
+for (const element of document.querySelectorAll('[data-demo-pending]')) {
+    element.hidden = Boolean(demo);
+}
+for (const element of document.querySelectorAll('[data-demo-ready]')) {
+    element.hidden = !demo;
 }
 document.querySelectorAll('[data-current-year]').forEach(element => {
     element.textContent = new Date().getFullYear();
@@ -25,4 +38,3 @@ document.addEventListener('click', event => {
     updateThemeControl();
 });
 updateThemeControl();
-

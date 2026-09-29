@@ -1,6 +1,7 @@
 <p class="docs-kicker">Flexible reporting</p>
 <h1>Custom dashboards</h1>
 <p class="docs-lead">Build one focused view for each team or question. Dashboards can mix native analytics, explorations, external metrics, calculated fields, and blended metrics without tying a block to one future data provider.</p>
+<div class="docs-callout"><span>▶</span><p>Follow the full reporting path: <a href="/docs/tutorials-reporting/#tutorial-dashboard">build a useful dashboard</a>, <a href="/docs/tutorials-reporting/#tutorial-share-dashboard">share it safely</a>, and <a href="/docs/tutorials-reporting/#tutorial-schedule-report">schedule a useful email report</a>.</p></div>
 
 <h2 id="create-dashboard">Create a dashboard</h2>
 <p>Open a site and choose <strong>Custom dashboards</strong>. Start from Executive, Product, Content, or Campaign structure, give the dashboard a clear name, and then enter edit mode.</p>
@@ -29,11 +30,11 @@
 <p>Dashboard changes create versions. Use undo while editing or restore an earlier saved version when a layout or configuration no longer works. Version history also provides a useful audit trail for shared team dashboards.</p>
 
 <h2 id="sharing">Share a dashboard</h2>
-<p>Create a public share link from dashboard settings. Add a password when the report should be available outside the signed-in workspace but still protected. Revoke a share when its audience or purpose changes.</p>
+<p>Use <strong>Share &amp; report</strong> below a dashboard to create an expiring read-only link for 7, 30, or 90 days. Add a password when the report should be available outside the signed-in workspace but still protected. The shared view currently shows the last 30 days. There is no per-link revoke control in the current interface, so choose an expiry that fits the audience and purpose before creating the link.</p>
 <div class="docs-callout warning"><span>!</span><p>A share link exposes the dashboard data rendered by that link. Treat the URL and password as credentials, and review every tab before sharing it outside the organization.</p></div>
 
 <h2 id="export-schedule">Export and schedule</h2>
-<p>Export the current dashboard for offline use, or create a recurring email schedule. Scheduled reports render the configured tabs and blocks for recipients without requiring them to sign in. Configure a real mail transport before relying on delivery.</p>
+<p>Export a 30-day CSV for offline use, or create a weekly or monthly email schedule. Scheduled emails show a compact, last-30-days rendering of configured tabs and blocks, so recipients can read the summary without signing in. The <strong>Open dashboard</strong> link still requires workspace access. Configure a real mail transport and running scheduler and worker before relying on delivery; the listed sent time means the report was queued, so confirm arrival in the inbox.</p>
 
 <h2 id="design-guidance">Dashboard design guidance</h2>
 <ul>

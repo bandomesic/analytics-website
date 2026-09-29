@@ -4,7 +4,7 @@
 
 <div class="docs-callout success"><span>✓</span><p><strong>Start with standard analytics.</strong> Add Object Analytics only when you need to compare individual items, preserve their history, model parent and child relationships, or give someone access to one focused report.</p></div>
 
-<div class="docs-callout"><span>▶</span><p><strong>Prefer to learn by doing?</strong> Open the <a href="/docs/tutorials/#object-collections">interactive tutorials</a> for animated walkthroughs of collections, repeating cards, nested objects, and regular expressions.</p></div>
+<div class="docs-callout"><span>▶</span><p><strong>Prefer a visual overview?</strong> Follow <a href="/docs/tutorials-object/#tutorial-object-flow">how object data becomes a report</a>. Then try <a href="/docs/tutorials-object/#tutorial-identity">stable object IDs</a>, a <a href="/docs/tutorials-object/#tutorial-collection">detail-page</a> or <a href="/docs/tutorials-object/#tutorial-cards">repeating-card</a> mapping, <a href="/docs/tutorials-object/#tutorial-read-objects">report metrics</a>, <a href="/docs/tutorials-object/#tutorial-fix-objects">missing objects</a>, and <a href="/docs/tutorials-object/#tutorial-portal">scoped report access</a> when you need it.</p></div>
 
 <h2 id="when-to-use">When to use Object Analytics</h2>
 <div class="docs-table-wrap"><table><thead><tr><th>Question</th><th>Best feature</th></tr></thead><tbody>
@@ -95,24 +95,53 @@ Group 1: sku-10042</code></pre></div>
 <tr><td>Send once per page</td><td>Prevents duplicate actions for the same mapped object during one page lifecycle.</td></tr>
 </tbody></table></div>
 
-<h2 id="examples">Common structures</h2>
-<h3>Detail pages</h3>
-<div class="docs-code"><pre><code>Object type: product
-Action: view
-Trigger: page opens
-Page pattern: /products/*
-ID source: current page URL
-Capture group: 1</code></pre></div>
+<h2 id="examples">Two complete examples</h2>
+<p>These examples use the same two products in a catalog. First record a detail-page view; then record an impression for each listing card. Both mappings use the same object type and stable key, so their actions join in one report.</p>
 
-<h3>Cards on a listing page</h3>
-<div class="docs-code"><pre><code>Object type: article
-Action: impression
-Trigger: element becomes visible
-Page pattern: /library
-Element selector: .article-card
-ID source: link inside selected element
-Link pattern: /articles/*
-Display-name selector: .article-title</code></pre></div>
+<h3 id="worked-detail-page">Example 1: one mapping for product detail pages</h3>
+<p>Suppose the site has <code>/products/sku-10042</code> and <code>/products/sku-10043</code>. Each URL ends with a permanent product ID, and the page has a visible heading:</p>
+<div class="docs-code"><pre><code>&lt;h1&gt;Trail Backpack&lt;/h1&gt;</code></pre></div>
+<p>In <strong>Tracking &amp; events → Create an object mapping</strong>, choose <strong>Detail pages</strong> and set these fields:</p>
+<div class="docs-table-wrap"><table><thead><tr><th>Field</th><th>Value</th><th>Why</th></tr></thead><tbody>
+<tr><td>Mapping name</td><td><code>Product detail views</code></td><td>Describes the rule to your team.</td></tr>
+<tr><td>Object type</td><td><code>product</code></td><td>Groups products without fixing a built-in taxonomy.</td></tr>
+<tr><td>Record as / When it happens</td><td>View / Page opens</td><td>Counts an opened detail page as a product view.</td></tr>
+<tr><td>Page URL pattern</td><td><code>/products/*</code></td><td>The wildcard captures the last path segment.</td></tr>
+<tr><td>Element selector</td><td>Leave blank</td><td>Page-open actions do not need an element.</td></tr>
+<tr><td>Display-name selector</td><td><code>h1</code></td><td>Uses the page heading as a readable label.</td></tr>
+<tr><td>Get object ID from / Extraction method / ID capture number</td><td>Current page URL / Simple wildcard / <code>1</code></td><td>Extracts <code>sku-10042</code> from the example URL.</td></tr>
+<tr><td>Link pattern or regex</td><td>Leave blank</td><td>The page pattern already supplies the ID.</td></tr>
+</tbody></table></div>
+<ol class="docs-steps">
+    <li><strong>Publish and visit a product.</strong><p>After confirming the base tracker is connected, publish the mapping and open <code>/products/sku-10042</code> in a normal browser session.</p></li>
+    <li><strong>Check the result.</strong><p>After processing, filter Object Analytics by <code>product</code>. Find the object with key <code>sku-10042</code>, label “Trail Backpack”, and a new view action. Open the second URL to confirm it creates a separate key.</p></li>
+</ol>
+<div class="docs-callout"><span>✓</span><p><strong>Expected identity:</strong> <code>product:sku-10042</code>. A renamed heading can change the label while the key remains the same. If the URL segment changes with the title, this URL-based mapping is unsuitable; choose a stable URL ID or another supported mapping structure.</p></div>
+
+<h3 id="worked-repeating-cards">Example 2: one mapping for every catalog card</h3>
+<p>Now suppose <code>/catalog</code> displays many cards, each linking to one product. The first two cards might look like this:</p>
+<div class="docs-code"><pre><code>&lt;article class="product-card"&gt;
+  &lt;a href="/products/sku-10042"&gt;&lt;span class="product-name"&gt;Trail Backpack&lt;/span&gt;&lt;/a&gt;
+&lt;/article&gt;
+&lt;article class="product-card"&gt;
+  &lt;a href="/products/sku-10043"&gt;&lt;span class="product-name"&gt;Canvas Tote&lt;/span&gt;&lt;/a&gt;
+&lt;/article&gt;</code></pre></div>
+<p>Create a second mapping using <strong>Repeating cards</strong>:</p>
+<div class="docs-table-wrap"><table><thead><tr><th>Field</th><th>Value</th><th>Why</th></tr></thead><tbody>
+<tr><td>Mapping name / Object type</td><td><code>Catalog card impressions</code> / <code>product</code></td><td>Reuses the detail-page mapping's type.</td></tr>
+<tr><td>Record as / When it happens</td><td>Impression / Element becomes visible</td><td>Counts a card only after meaningful visibility.</td></tr>
+<tr><td>Page URL pattern / Element selector</td><td><code>/catalog</code> / <code>.product-card</code></td><td>Selects each card separately on the catalog page.</td></tr>
+<tr><td>Display-name selector</td><td><code>.product-name</code></td><td>Reads the label inside each selected card.</td></tr>
+<tr><td>Get object ID from / Extraction method</td><td>Link inside the selected element / Simple wildcard</td><td>Reads the card's own link instead of the shared catalog URL.</td></tr>
+<tr><td>Link pattern or regex / ID capture number</td><td><code>/products/*</code> / <code>1</code></td><td>The link yields <code>sku-10042</code> or <code>sku-10043</code>.</td></tr>
+<tr><td>Visibility threshold / Visible duration</td><td><code>50%</code> / <code>1000</code> milliseconds</td><td>Requires half the card to be visible for one second.</td></tr>
+<tr><td>Send once per page</td><td>On</td><td>Prevents repeated impressions while scrolling back and forth.</td></tr>
+</tbody></table></div>
+<ol class="docs-steps">
+    <li><strong>Publish and expose one card.</strong><p>Open <code>/catalog</code>, scroll until at least half of the Trail Backpack card is visible, and leave it visible for a second. Do the same for Canvas Tote.</p></li>
+    <li><strong>Check two separate results.</strong><p>After processing, find <code>product:sku-10042</code> and <code>product:sku-10043</code> in Object Analytics. Each should gain its own impression. The first product's earlier detail-page view and card impression should appear under the same object.</p></li>
+</ol>
+<div class="docs-callout"><span>i</span><p>If all cards share one key, the selector or link extraction is wrong. If no impression appears, confirm the actual page path, link, visibility threshold, tracker connection, and processing status before changing the object type.</p></div>
 
 <h3>Parent and child objects</h3>
 <div class="docs-code"><pre><code>Page pattern: /courses/*/lessons/*
