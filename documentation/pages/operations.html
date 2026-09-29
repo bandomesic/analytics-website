@@ -35,7 +35,7 @@ curl --fail https://analytics.example.com/health</code></pre></div>
 <p><code>RAW_RETENTION_DAYS</code> controls raw event lifetime, while <code>AGGREGATE_RETENTION_MONTHS</code> controls longer-lived rollups. Choose values that support real analysis and your privacy obligations. Shorter raw retention reduces storage and exposure while keeping aggregated trends available.</p>
 
 <h2 id="geoip">GeoIP</h2>
-<p>No GeoIP database is bundled. Obtain a compatible local database under the provider's terms, place it at the configured <code>GEOIP_PATH</code>, and use the optional update URL for scheduled refreshes. Reports continue without it, but geographic detail remains unavailable.</p>
+<p>No GeoIP database is bundled. For a no-account setup, configure the <a href="/docs/environment/#geoip">DB-IP City Lite update URL</a>, deploy the environment change, then run <code>docker compose exec -T app php artisan analytics:geoip-update</code> from the active release. The system-health page should then show GeoIP as installed. Scheduled updates use the same URL. Reports continue without a database, but geographic detail remains unavailable.</p>
 
 <h2 id="security-checklist">Security checklist</h2>
 <ul>

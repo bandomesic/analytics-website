@@ -71,7 +71,10 @@ MAIL_FROM_NAME="Privacy Analytics"</code></pre></div>
 <h2 id="geoip">Optional GeoIP</h2>
 <div class="docs-code"><pre><code>GEOIP_PATH=/var/www/html/storage/app/geoip/GeoLite2-City.mmdb
 GEOIP_UPDATE_URL=</code></pre></div>
-<p>No location database is bundled. <code>GEOIP_PATH</code> should point to a compatible local MMDB file in persistent private storage. <code>GEOIP_UPDATE_URL</code> may contain an HTTPS URL for an MMDB or tar.gz archive; treat signed URLs and license keys as secrets. Without a valid file, collection continues and country or region stays unknown.</p>
+<p>No location database is bundled. <code>GEOIP_PATH</code> should point to a compatible local MMDB file in persistent private storage. <code>GEOIP_UPDATE_URL</code> accepts an HTTPS URL for an MMDB, gzip-compressed MMDB, or tar.gz archive. Without a valid file, collection continues and country or region stays unknown.</p>
+<p>For an account-free option, use <a href="https://db-ip.com/db/download/ip-to-city-lite">DB-IP City Lite</a>:</p>
+<div class="docs-code"><pre><code>GEOIP_UPDATE_URL=https://download.db-ip.com/free/dbip-city-lite-{YYYY-MM}.mmdb.gz</code></pre></div>
+<p>The updater fills in the current UTC month, so scheduled updates follow new monthly releases. DB-IP City Lite is free under CC BY 4.0, with the required attribution link shown in the application footer when this URL is configured. It provides country codes but no ISO region codes, and its coverage is less complete than a paid database. Keep any signed URLs or provider keys secret.</p>
 
 <h2 id="logging">Logging</h2>
 <p>The default production configuration writes warnings and errors to standard error:</p>
